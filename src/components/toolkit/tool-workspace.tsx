@@ -61,7 +61,7 @@ function Summarizer({id}:{id:string|null}){
 function SeoChecker({title,description,tags}:{title:string;description:string;tags:string[]}){
  const audit=seoAudit(title,description,tags);const weak=100-audit.score;
  const run=useServerFn(improveDescription);const [out,setOut]=useState('');const [busy,setBusy]=useState(false);const [err,setErr]=useState('');
- const go=async()=>{setBusy(true);setErr('');try{const r=await run({data:{title:title.slice(0,200),description:description.slice(0,5000),tags:tags.slice(0,60)}});if(r.error||!r.description)setErr(r.error??'AI writing failed. Please try again.');else setOut(r.description);}catch{setErr('AI writing failed. Please try again.');}finally{setBusy(false);}};
+ const go=async()=>{if(busy)return;setBusy(true);setErr('');setOut('');try{const r=await run({data:{title:title.slice(0,200),description:description.slice(0,5000),tags:tags.slice(0,60)}});if(r.error||!r.description)setErr(r.error??'AI writing failed. Please try again.');else setOut(r.description);}catch{setErr('AI writing failed. Please try again.');}finally{setBusy(false);}};
  const better=out?seoAudit(title,out,tags).score:0;
  return <div className="space-y-5"><div className="grid gap-3 sm:grid-cols-2"><Metric label="Metadata score" value={`${audit.score} / 100`}/><Metric label="How weak your metadata is" value={`${weak}% weak`}/></div>
  <div className="h-3 w-full overflow-hidden rounded-full bg-muted" aria-hidden><div className="h-full bg-primary" style={{width:`${weak}%`}}/></div>
@@ -79,8 +79,8 @@ function AiGenerator({tool,input}:{tool:string;input:string}){
  const generation=useRef(0);
  const validTool=aiGeneratorTools.find(name=>name===tool);
  const go=async(refresh=false)=>{
-  if(!validTool||topic.trim().length<2)return;
-  const version=++generation.current;setBusy(true);setErr('');
+  if(!validTool||topic.trim().length<2||busy)return;
+  const version=++generation.current;setBusy(true);setErr('');setItems([]);
   const key=['creator-text',validTool,topic];
   try{if(refresh)await queryClient.invalidateQueries({queryKey:key,exact:true,refetchType:'none'});
    const result=await queryClient.fetchQuery({queryKey:key,queryFn:()=>run({data:{tool:validTool as 'Tag Generator'|'Title Generator'|'Description Generator'|'Channel Name Generator',topic}}),staleTime:300000,gcTime:300000,retry:false});
@@ -89,7 +89,7 @@ function AiGenerator({tool,input}:{tool:string;input:string}){
   }catch{if(version===generation.current)setErr('AI writing failed. Please try again.');}finally{if(version===generation.current)setBusy(false);}
  };
  useEffect(()=>{if(input.trim().length>1)void go();return()=>{generation.current++;};},[]);
- return <div className="space-y-4"><label className="grid gap-2 text-sm">{names?'Your niche or channel topic':'Video topic or description'}<Textarea value={topic} maxLength={2000} rows={3} placeholder={names?'e.g. budget travel in Asia':'e.g. how to make sourdough bread at home'} onChange={e=>setTopic(e.target.value)}/></label><Button disabled={topic.trim().length<2||busy} onClick={()=>void go(true)}>{busy?<Loader2 className="animate-spin"/>:<Sparkles/>}{busy?'Writing…':items.length?'Generate again':'Generate'}</Button>{err&&<p role="alert" className="text-sm text-primary">{err}</p>}
+ return <div className="space-y-4"><label className="grid gap-2 text-sm">{names?'Your niche or channel topic':'Video topic or description'}<Textarea value={topic} disabled={busy} maxLength={2000} rows={3} placeholder={names?'e.g. budget travel in Asia':'e.g. how to make sourdough bread at home'} onChange={e=>{setTopic(e.target.value);setItems([]);setErr('');}}/></label><Button disabled={topic.trim().length<2||busy} onClick={()=>void go(true)}>{busy?<Loader2 className="animate-spin"/>:<Sparkles/>}{busy?'Writing…':items.length?'Generate again':'Generate'}</Button>{err&&<p role="alert" className="text-sm text-primary">{err}</p>}
  {items.length>0&&(tool==='Description Generator'?<div className="space-y-3"><div className="rounded-md border border-border bg-card p-4 text-sm whitespace-pre-wrap break-words">{items[0]}</div><CopyButton text={items[0]??''}/></div>:tags?<div className="space-y-3"><div className="flex flex-wrap gap-2">{items.map(t=><span key={t} className="rounded-md border border-border px-3 py-1 text-sm">{t}</span>)}</div><p className="text-xs text-muted-foreground">{items.join(', ').length} / 500 characters (YouTube’s tag limit)</p><CopyButton text={items.join(', ')}/></div>:<ul className="space-y-3">{items.map(r=><li key={r} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border pb-3"><span>{r}{tool==='Title Generator'&&<small className="ml-2 text-muted-foreground">{r.length} chars</small>}</span><div className="flex gap-2"><CopyButton text={r}/>{names&&<Button variant="outline" size="sm" asChild><a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(r)}&sp=EgIQAg%3D%3D`} target="_blank" rel="noreferrer">Check <ExternalLink/></a></Button>}</div></li>)}</ul>)}
  <p className="text-xs text-muted-foreground">AI-powered suggestions. Review and personalize before publishing.</p></div>;
 }
@@ -138,7 +138,7 @@ export function ToolWorkspace({tool,input}:{tool:string;input:string}) {
   if(['Tag Extractor','Tag Finder','Keyword Finder'].includes(tool))return <div className="space-y-4"><h3 className="font-bold">{tool==='Keyword Finder'?'Extracted keywords':r.videos!==undefined?'Published channel tags':'Published video tags'}</h3><div className="flex flex-wrap gap-2">{(tool==='Keyword Finder'?recordKeywords(r):publicTags(r)).map(t=><span key={t} className="rounded-md border border-border px-3 py-1 text-sm">{t}</span>)}</div>{publicTags(r).length===0&&tool!=='Keyword Finder'&&<p className="text-sm text-muted-foreground">No published tags were returned. The owner may not have supplied public tags.</p>}<CopyButton text={(tool==='Keyword Finder'?recordKeywords(r):publicTags(r)).join(', ')}/></div>;
   if(tool==='Title Viewer')return <div className="space-y-4"><Metric label="Video title" value={r.title||'No public title.'}/><CopyButton text={r.title}/></div>;
   if(tool==='Description Viewer')return <div className="space-y-4"><p className="text-sm whitespace-pre-wrap break-words">{r.description||'No public description.'}</p><CopyButton text={r.description}/><Button variant="outline" onClick={()=>downloadText(r.description,'video-description.txt')}><Download/>Export description</Button></div>;
-  if(tool==='SEO Score Checker') return <SeoChecker title={r.title} description={r.description} tags={r.tags}/>;
+  if(tool==='SEO Score Checker') return <SeoChecker key={r.id} title={r.title} description={r.description} tags={r.tags}/>;
   if(tool==='Upload Date Finder')return <Metric label="Published date (UTC; may differ from original upload date)" value={new Date(r.publishedAt).toISOString().replace('T',' ').replace('.000Z',' UTC')}/>;
   if(tool==='Profile Downloader')return <div className="space-y-4"><SiteImage src={r.thumbnail} alt="Channel profile" width={160} height={160} className="h-40 w-40 rounded-md"/><FileDownload variant="outline" url={`/api/profile-image?url=${encodeURIComponent(r.thumbnail)}`} name="youtube-profile" label="Download profile image"/></div>;
   if(tool==='Channel ID Finder')return <div className="space-y-4"><Metric label="Channel ID" value={r.channelId||r.id}/><CopyButton text={r.channelId||r.id}/></div>;

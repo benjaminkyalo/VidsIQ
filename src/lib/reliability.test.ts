@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { withinDeadline, MEDIA_DEADLINE_MS, AI_DEADLINE_MS } from './request-deadline';
+import { withinDeadline, MEDIA_DEADLINE_MS } from './request-deadline';
 import { validateToolInput } from './tool-engine';
 
 afterEach(() => vi.useRealTimers());
@@ -13,7 +13,6 @@ it('enforces the intended 60-second media deadline even on a pending operation',
   await vi.advanceTimersByTimeAsync(60_000);
   await assertion;
 });
-it('bounds AI waiting to 60 seconds', () => expect(AI_DEADLINE_MS).toBe(60_000));
 it.each(['MP3 Downloader', 'YouTube Shorts Downloader', 'YouTube URL Downloader', 'Thumbnail Downloader'])('%s rejects a channel handle', tool => {
   expect(() => validateToolInput(tool, '@mkbhd')).toThrow();
   expect(validateToolInput(tool, 'jNQXAC9IVRw')).toBe('jNQXAC9IVRw');

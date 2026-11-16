@@ -1,5 +1,4 @@
 export const MEDIA_DEADLINE_MS = 60_000;
-export const AI_DEADLINE_MS = 60_000;
 
 export function withinDeadline<T>(operation: PromiseLike<T>, signal: AbortSignal): Promise<T> {
   return new Promise((resolve, reject) => {

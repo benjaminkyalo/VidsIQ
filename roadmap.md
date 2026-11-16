@@ -1,3 +1,9 @@
+# Transparent brand logo
+- [x] Improve and verify all six AI flows: titles, tags, channel names, descriptions, summaries, and SEO rewrites returned real results; copy and stale-output clearing verified. Removed AI timer cancellation and unsafe retries; enforced title/tag limits. All 59 tests pass and build is clean.
+- [x] Correct caption commands, validate iframe messages, include player origin/referrer, reset controls per video, and verify theater/Escape plus mobile fit without publishing.
+- [ ] Confirm actual playback, captions, and speed changes — blocked by YouTube’s bot-verification screen in the test browser; no restriction bypass attempted. Other tools are deferred by the owner.
+- [x] Replace the header and footer artwork with the user-supplied transparent VidsIQ logo, remove the white badge, and verify desktop/mobile rendering.
+
 # Screenshot recreation
 - [x] Recreate header, hero, and complete tool grids.
 - [x] Recreate alternating illustrated steps, testimonials, information, and footer.
@@ -24,7 +30,7 @@
 
 # Theme and sync
 - [x] Restyle whole site to Optima blue background, white cards, green accents, navy footer per latest screenshots; verified hero, tool grids, and footer.
-- [x] Push current site to GitHub repo benjaminkyalo/youtubedownloadpro: 111 files committed on branch `lovable-site`, pull request #1 open against `main`.
+- [x] Push current site to GitHub repo benjaminkyalo/youtubedownloadpro: 111 files committed on the site branch, pull request #1 open against `main`.
 - [ ] Two-way Git sync — blocked: the user must connect the repository in Project settings → Git; the agent cannot connect it.
 # Tool pages (youtubetoolkit.com parity)
 - [x] Dedicated page per tool, card and menu links, verified in browser.

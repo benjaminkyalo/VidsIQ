@@ -40,7 +40,9 @@ use the editor.
 - Derive each tool's search identity, self-canonical, and WebApplication metadata in the browser-safe shared SEO module, so crawlers identify tools individually without hardcoded deployment hosts.
 - Cache only successful public upstream YouTube JSON with bounded request coalescing and short freshness windows; never cache sessions or expiring media links, to reduce quota use without leaking private data.
 - Warm the shared workspace chunk on form interaction and reuse query results across tool submissions; explicit refresh invalidates browser results while upstream counts retain a short freshness window.
-- Share submission state through useToolSubmission; isolate player, media, and copy/export controls, coalesce AI drafts with Query, and bound media/AI waits to avoid duplicate work and stale results.
+- Share submission state through useToolSubmission; isolate player, media, and copy/export controls, coalesce AI drafts with Query, and bound media waits; consume AI streams without timer cancellation to avoid discarding billed work.
+- Validate AI suggestion lists in the shared creator-output module and retry only explicit rate-limit/server failures, so displayed limits and copied content agree without replaying terminal failures.
+- Accept player events only from the current YouTube iframe and use supported caption-module commands; reset controls per video to avoid stale playback settings.
 
 - Render all site images through SiteImage with explicit intrinsic dimensions; default to lazy loading and asynchronous decoding, and prioritize only immediately needed imagery to avoid offscreen competition.
 - For new uploaded site artwork, generate appropriately sized modern-format renditions before CDN upload and supply responsive srcSet/sizes; keep original-quality image downloads separate from display optimization.
