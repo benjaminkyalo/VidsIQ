@@ -2,7 +2,7 @@ import { z } from 'zod';
 export const textInputSchema = z.string().trim().max(2000);
 const videoPattern = /^[A-Za-z0-9_-]{11}$/;
 const channelPattern = /^UC[A-Za-z0-9_-]{22}$/;
-export type YouTubeInput = { kind: 'video' | 'channel' | 'handle' | 'query'; value: string; playlist?: string | undefined; start: number };
+export type YouTubeInput = { kind: 'video' | 'channel' | 'handle' | 'playlist' | 'query'; value: string; playlist?: string | undefined; start: number };
 export function parseYouTubeInput(raw: string): YouTubeInput {
  const text = textInputSchema.parse(raw);
  if (videoPattern.test(text)) return { kind: 'video', value: text, start: 0 };
@@ -16,6 +16,8 @@ export function parseYouTubeInput(raw: string): YouTubeInput {
   const time = url.searchParams.get('t') ?? url.searchParams.get('start') ?? '0';
   const start = /^\d+$/.test(time) ? Number(time) : [...time.matchAll(/(\d+)(h|m|s)/g)].reduce((sum,m) => sum + Number(m[1]) * (m[2] === 'h' ? 3600 : m[2] === 'm' ? 60 : 1),0);
   if (id && videoPattern.test(id)) return { kind: 'video', value: id, playlist: url.searchParams.get('list') ?? undefined, start: Math.min(start,86400) };
+  const list = url.searchParams.get('list');
+  if (parts[0] === 'playlist' && list && /^[A-Za-z0-9_-]{10,64}$/.test(list)) return { kind: 'playlist', value: list, playlist: list, start: 0 };
   if (parts[0] === 'channel' && channelPattern.test(parts[1] ?? '')) return { kind: 'channel', value: parts[1] ?? '', start: 0 };
   if (parts[0]?.startsWith('@')) return parseYouTubeInput(parts[0]);
   if (parts[0] === 'user' || parts[0] === 'c') return { kind: 'query', value: parts[1] ?? text, start: 0 };
@@ -60,14 +62,16 @@ export function createSuggestions(tool: string, text: string, tone: string) {
  return tone === 'Question' ? [`What was the hardest part of ${topic}?`,`Which part of ${topic} would you recommend trying first?`,`Could you share more about ${topic} in a follow-up?`] : [`Thanks for sharing your perspective on ${topic}!`,`The explanation of ${topic} was clear and helpful.`,`I’d love to see more content about ${topic}.`];
 }
 export const calculatorTools = ['Watch Time Calculator','Money Calculator','Views to Money','Video Money Calculator','Advanced Money Calculator','Live Stream Calculator','Monetization Checker'];
-export const generatorTools = ['Channel Ideas','Clickbait Title Generator','Comment Generator','Hashtag Generator'];
+export const generatorTools = ['Channel Ideas','Clickbait Title Generator','Comment Generator','Hashtag Generator','Tag Generator','Title Generator','Description Generator','Channel Name Generator'];
+export const aiGeneratorTools = ['Tag Generator','Title Generator','Description Generator','Channel Name Generator'];
 export const optionalInputTools = [...calculatorTools,...generatorTools,'BPM Finder','Royalty-Free Music','YouTube Stats – Top 100 Channels','Find YouTube Channel','YouTube URL Finder'];
-export const videoOnlyTools = ['Thumbnail Viewer','Link Viewer','YouTube Embed Viewer','YouTube Without Ads','Deleted Video Finder','Video Downloader','Audio Downloader','Comments Viewer','Comment Finder','Comment Sentiment Analysis','Dislike Checker','YouTube Rank Checker'];
+export const videoOnlyTools = ['MP3 Downloader','YouTube Shorts Downloader','YouTube URL Downloader','Thumbnail Downloader','Thumbnail Viewer','Link Viewer','YouTube Embed Viewer','YouTube Without Ads','Deleted Video Finder','Video Downloader','Audio Downloader','Comments Viewer','Comment Finder','Comment Sentiment Analysis','Dislike Checker','YouTube Rank Checker','Transcript Generator','Subtitle Downloader','Video Summarizer','Shorts to MP3','YouTube to MP3','YouTube to MP4'];
 export function validateToolInput(tool: string, input: string) {
  const text = textInputSchema.parse(input);
  if (!text && !optionalInputTools.includes(tool)) throw new Error('Enter a channel or video URL, ID, or search phrase to continue.');
  if (!text) return text;
  const parsed = parseYouTubeInput(text);
  if (videoOnlyTools.includes(tool) && parsed.kind !== 'video') throw new Error(`${tool} requires a YouTube video link or 11-character video ID.`);
+ if (tool === 'Playlist Downloader' && !parsed.playlist) throw new Error('Playlist Downloader requires a YouTube playlist link (it contains list=).');
  return text;
 }

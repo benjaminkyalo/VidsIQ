@@ -20,13 +20,48 @@
 - [x] Connect public YouTube metadata, search, comments, and channel analytics.
 - [x] Verify real inputs, downloads, calculation rules, and mobile results: 11 tests pass; live metadata, channel IDs, search, comments, dislike estimates, thumbnail/profile files, hashtags, and mobile calculators exercised.
 - [x] Identify YouTube access limitations without fabricated results: monetization and shadowban are not public statuses; private/age restrictions cannot be bypassed; Top 100 is channel discovery rather than a verified global leaderboard.
-- [ ] Connect MP4/MP3 delivery — blocked on a media-processing service connection.
+- [x] Connect MP4/MP3 delivery through community services; long-media reliability remains dependent on provider availability.
 
 # Theme and sync
 - [x] Restyle whole site to Optima blue background, white cards, green accents, navy footer per latest screenshots; verified hero, tool grids, and footer.
-- [ ] GitHub sync — blocked: connecting a repository is a UI-only action (Project settings → Git); agent cannot connect it.
+- [x] Push current site to GitHub repo benjaminkyalo/youtubedownloadpro: 111 files committed on branch `lovable-site`, pull request #1 open against `main`.
+- [ ] Two-way Git sync — blocked: the user must connect the repository in Project settings → Git; the agent cannot connect it.
 # Tool pages (youtubetoolkit.com parity)
 - [x] Dedicated page per tool, card and menu links, verified in browser.
 
 ## Open tasks
+- [x] Image previews: shared pasted-video thumbnails and debounced channel-profile lookup on homepage and all 57 tool forms; metadata imagery now remains beside calculator results. Verified all 57 page previews, real channel images at desktop/mobile widths, clearing input, and real Watch Time Calculator metadata. Sixteen tests pass and latest build is clean; worldwide image delivery remains dependent on YouTube and visitor connections.
+- [x] Global delivery and crawler readiness: configured all 63 public pages for prerendering with automatic discovery disabled, preserved live submissions, allowed named AI crawlers, and added factual Organization metadata. English only; no translated folders or nonexistent hreflang destinations. Nine tests pass, all public pages respond, and desktop/mobile Link Viewer works. Published static output and worldwide delivery remain unverified until publication; no visitor vitals were recorded in the last seven days. Firewall, HTTP/3, and hosted compression cannot be verified from local checks. llms.txt and sitemap submission were not explicitly requested and were not performed.
+- [x] Wording review: rewrote all 57 tool descriptions and shared search descriptions, removed duplicate homepage paragraphs and unsupported testimonials, and clarified stale claims. All 63 pages return successfully; 18 tests and desktop/mobile Link Viewer checks pass. Contact details and finalized legal documents still require owner-provided material; this copy review does not establish Google indexing readiness.
+- [x] Image performance: responsive CDN artwork reduces each displayed illustration to about 9–23 KB; all images use shared loading defaults with dimensions and asynchronous decoding. Verified desktop/mobile artwork, pasted thumbnails, and an original-quality image download; future uploads follow the recorded optimization standard. Global visitor speed remains unmeasured (no published vitals).
+- [x] Individual tool search: verified independent titles, self-canonicals, crawlable metadata, and structured tool identities for all 57 pages; direct Link Viewer submission works. Public search indexing requires publishing and remains Google's decision.
+- [x] Global performance: reuse public lookups, prevent duplicate requests, warm tool code on interaction, and verify real tool flows; 22 tests pass, real channel/video results and mobile thumbnail downloads verified.
+- [ ] Verify thousands-of-users capacity — requires published traffic measurements and a reliable media provider; free community download services offer no capacity guarantee.
 - [x] Site speed: lazy-loaded tool workspace and guide sections; first paint ~0.5s, results code loads only after submit
+- [x] Added the 12 youtubetoolkit dead-404 pages as catalog tools mapped to existing behaviors; all 17 tests pass, pages verified live.
+- [x] Real MP3/MP4 downloads via free cobalt community instance (co.otomir23.me): getMediaDownload server fn + MediaDownload UI; verified end-to-end — 3.4MB MP3 and 29.9MB 720p MP4 downloaded in browser test.
+- [x] Add 10 high-demand tools (verified live; 31 tests pass): Transcript Generator, Subtitle Downloader, Video Summarizer (AI), Playlist Downloader, Subscriber Count, Tag/Channel Name/Description/Title Generators (AI), Shorts to MP3.
+
+# Navbar tools menu
+- [x] Hover-triggered panel below the navbar listing all 69 tools in columns; verified open/stay-open/close, links on tool pages, selection on home, mobile unchanged.
+
+# Panel sizing and picks
+- [x] Enlarge the hover-panel tool entries and curate them to the most searched / most essential tools.
+
+# Panel button
+- [x] Make the More tools button small and professional (compact outlined control, not a big red block).
+
+# Blog cards
+- [x] Recreate blog page as article card grid with first 5 posts, all posts in one editable list.
+- [x] Individual indexable page per blog post (metadata, Article schema, sitemap, prerender).
+
+# Tool value and screenshot results
+- [x] Implement approved reliability fixes without publication: unified submission state hides stale results and prevents identical re-submissions; AI waits for video metadata and coalesces requests; media and AI have 60-second deadlines; empty media retries preserve the successful filename; downloader inputs reject handles; keyword display/copy share one list; caption signatures are fetched fresh; monetization is explicitly an estimate; watch FAQs match available controls. Removed unreferenced legacy lookups and separated player/media/result controls. All 52 tests pass; real thumbnail saving, one AI request producing ten titles, real keyword clipboard equality, monetization estimate, player theater mode, and mobile overflow checks pass. Free conversion reliability and YouTube playback restrictions remain external limitations; no publication performed.
+- [x] Review code strength and failure handling without implementation or publication: all 42 tests pass; reproduced stale results after clearing input, downloader handle validation mismatch, missing watch controls described in FAQs, and multiple attempted AI calls for one video submission (blocked to avoid spending). Source review confirms incomplete media deadline, display/copy keyword mismatch, cached expiring caption URLs, misleading monetization verdicts, duplicate submission logic, unreferenced legacy YouTube functions, and missing failure-flow regression tests. Corrective changes await approval; publication remains the owner’s responsibility.
+- [x] Improve all tool search pages without changing functionality: 68 additional task-specific guides (136 distinct questions and answers), intent-specific titles, relevant follow-up links, and shorter FAQ questions without repeated tool names. All 69 pages have unique titles, self-canonicals, and at least ten initial-HTML FAQs; desktop/mobile thumbnail results verified, tests pass. Search inclusion requires publication and remains Google’s decision.
+- [x] Preserve YouTube Without Ads functionality; improve its search identity, crawlable viewing/ad-limit guidance, 15 specific FAQs and related-tool links. Verified initial HTML, self-canonical, real-video player loading, mobile overflow and 20 relevant tests; build OK. Search inclusion requires publication; YouTube verification still limits playback testing.
+- [x] Refine first screenshot tool (Private YouTube Viewer): single identity header, green/red/unknown evidence indicators, region/access summaries, current-privacy comparison, and real-link verification. Screenshot video returns public, 1:35:04, BY/RU restrictions; copy and country checks work, missing record stays unknown, desktop/mobile checked, 23 relevant tests pass, build OK. Playback remains subject to YouTube restrictions.
+- [x] Expand the three privacy/access tools to show evidence, region restrictions, access guidance, copyable reports, and permitted playback.
+- [x] Improve shared video result summaries with views, likes, comments, readable duration, publication details, and export/copy actions; preserve the existing channel report.
+- [x] Add at least ten relevant questions and answers to every individual tool page, with tool-specific purpose and limitations. Answers render in initial HTML; these are useful FAQs, not a verified global top-ten search ranking.
+- [x] Verify the screenshot’s real video: privacy public, duration 1:35:04, blocked BY/RU; copy/export, missing-video guidance, country selection, and real Video Viewer export pass. All 69 pages return 200 with ten FAQs, phone overflow absent, 39 tests pass, latest build OK. YouTube requires bot-verification sign-in in the test browser, so embedded playback itself is not verified. Other tools retain existing workflows; this first pass does not establish screenshot parity for tools not pictured.

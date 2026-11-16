@@ -18,3 +18,6 @@ describe('Calculations',()=>{
  it('includes sponsorship and affiliate values',()=>expect(calculate({...initialNumbers,sponsorship:50,affiliate:25}).totalRevenue).toBe(375));
 });
 it('produces keyword hashtags',()=>expect(createSuggestions('Hashtag Generator','Cooking pasta cooking','Supportive')).toEqual(['#cooking','#pasta']));
+it('reads playlist links',()=>expect(parseYouTubeInput('https://www.youtube.com/playlist?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG')).toMatchObject({kind:'playlist',playlist:'PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG'}));
+it('requires a playlist for Playlist Downloader',()=>expect(()=>validateToolInput('Playlist Downloader','dQw4w9WgXcQ')).toThrow(/playlist/));
+it('requires a video for Video Summarizer',()=>expect(()=>validateToolInput('Video Summarizer','@mkbhd')).toThrow());

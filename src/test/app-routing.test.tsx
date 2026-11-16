@@ -1,6 +1,12 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter, rootRouteId } from "@tanstack/react-router";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// Matching paths does not require the document shell or its font/media imports.
+vi.mock('@/routes/__root', async () => {
+  const { createRootRoute } = await import('@tanstack/react-router');
+  return { Route: createRootRoute() };
+});
 
 import { routeTree } from "@/routeTree.gen";
 

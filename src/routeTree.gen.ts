@@ -14,9 +14,14 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as BlogsRouteImport } from './routes/blogs'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WriteForUsRouteImport } from './routes/write-for-us'
+import { Route as YoutubeSeoRouteImport } from './routes/youtube-seo'
+import { Route as ApiMediaRouteImport } from './routes/api.media'
 import { Route as ApiProfileImageRouteImport } from './routes/api.profile-image'
 import { Route as ApiThumbnailRouteImport } from './routes/api.thumbnail'
+import { Route as BlogsSlugRouteImport } from './routes/blogs.$slug'
 import { Route as ToolsSlugRouteImport } from './routes/tools.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -44,9 +49,29 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WriteForUsRoute = WriteForUsRouteImport.update({
+  id: '/write-for-us',
+  path: '/write-for-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const YoutubeSeoRoute = YoutubeSeoRouteImport.update({
+  id: '/youtube-seo',
+  path: '/youtube-seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMediaRoute = ApiMediaRouteImport.update({
+  id: '/api/media',
+  path: '/api/media',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiProfileImageRoute = ApiProfileImageRouteImport.update({
@@ -59,6 +84,11 @@ const ApiThumbnailRoute = ApiThumbnailRouteImport.update({
   path: '/api/thumbnail',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogsSlugRoute = BlogsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogsRoute,
+} as any)
 const ToolsSlugRoute = ToolsSlugRouteImport.update({
   id: '/tools/$slug',
   path: '/tools/$slug',
@@ -68,35 +98,50 @@ const ToolsSlugRoute = ToolsSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blogs': typeof BlogsRoute
+  '/blogs': typeof BlogsRouteWithChildren
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/write-for-us': typeof WriteForUsRoute
+  '/youtube-seo': typeof YoutubeSeoRoute
+  '/api/media': typeof ApiMediaRoute
   '/api/profile-image': typeof ApiProfileImageRoute
   '/api/thumbnail': typeof ApiThumbnailRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
   '/tools/$slug': typeof ToolsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blogs': typeof BlogsRoute
+  '/blogs': typeof BlogsRouteWithChildren
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/write-for-us': typeof WriteForUsRoute
+  '/youtube-seo': typeof YoutubeSeoRoute
+  '/api/media': typeof ApiMediaRoute
   '/api/profile-image': typeof ApiProfileImageRoute
   '/api/thumbnail': typeof ApiThumbnailRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
   '/tools/$slug': typeof ToolsSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blogs': typeof BlogsRoute
+  '/blogs': typeof BlogsRouteWithChildren
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/write-for-us': typeof WriteForUsRoute
+  '/youtube-seo': typeof YoutubeSeoRoute
+  '/api/media': typeof ApiMediaRoute
   '/api/profile-image': typeof ApiProfileImageRoute
   '/api/thumbnail': typeof ApiThumbnailRoute
+  '/blogs/$slug': typeof BlogsSlugRoute
   '/tools/$slug': typeof ToolsSlugRoute
 }
 export interface FileRouteTypes {
@@ -107,9 +152,14 @@ export interface FileRouteTypes {
     | '/blogs'
     | '/contact'
     | '/privacy'
+    | '/sitemap.xml'
     | '/terms'
+    | '/write-for-us'
+    | '/youtube-seo'
+    | '/api/media'
     | '/api/profile-image'
     | '/api/thumbnail'
+    | '/blogs/$slug'
     | '/tools/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -118,9 +168,14 @@ export interface FileRouteTypes {
     | '/blogs'
     | '/contact'
     | '/privacy'
+    | '/sitemap.xml'
     | '/terms'
+    | '/write-for-us'
+    | '/youtube-seo'
+    | '/api/media'
     | '/api/profile-image'
     | '/api/thumbnail'
+    | '/blogs/$slug'
     | '/tools/$slug'
   id:
     | '__root__'
@@ -129,19 +184,28 @@ export interface FileRouteTypes {
     | '/blogs'
     | '/contact'
     | '/privacy'
+    | '/sitemap.xml'
     | '/terms'
+    | '/write-for-us'
+    | '/youtube-seo'
+    | '/api/media'
     | '/api/profile-image'
     | '/api/thumbnail'
+    | '/blogs/$slug'
     | '/tools/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  BlogsRoute: typeof BlogsRoute
+  BlogsRoute: typeof BlogsRouteWithChildren
   ContactRoute: typeof ContactRoute
   PrivacyRoute: typeof PrivacyRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  WriteForUsRoute: typeof WriteForUsRoute
+  YoutubeSeoRoute: typeof YoutubeSeoRoute
+  ApiMediaRoute: typeof ApiMediaRoute
   ApiProfileImageRoute: typeof ApiProfileImageRoute
   ApiThumbnailRoute: typeof ApiThumbnailRoute
   ToolsSlugRoute: typeof ToolsSlugRoute
@@ -184,11 +248,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/write-for-us': {
+      id: '/write-for-us'
+      path: '/write-for-us'
+      fullPath: '/write-for-us'
+      preLoaderRoute: typeof WriteForUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/youtube-seo': {
+      id: '/youtube-seo'
+      path: '/youtube-seo'
+      fullPath: '/youtube-seo'
+      preLoaderRoute: typeof YoutubeSeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/media': {
+      id: '/api/media'
+      path: '/api/media'
+      fullPath: '/api/media'
+      preLoaderRoute: typeof ApiMediaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/profile-image': {
@@ -205,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiThumbnailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blogs/$slug': {
+      id: '/blogs/$slug'
+      path: '/$slug'
+      fullPath: '/blogs/$slug'
+      preLoaderRoute: typeof BlogsSlugRouteImport
+      parentRoute: typeof BlogsRoute
+    }
     '/tools/$slug': {
       id: '/tools/$slug'
       path: '/tools/$slug'
@@ -215,13 +314,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BlogsRouteChildren {
+  BlogsSlugRoute: typeof BlogsSlugRoute
+}
+
+const BlogsRouteChildren: BlogsRouteChildren = {
+  BlogsSlugRoute: BlogsSlugRoute,
+}
+
+const BlogsRouteWithChildren = BlogsRoute._addFileChildren(BlogsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  BlogsRoute: BlogsRoute,
+  BlogsRoute: BlogsRouteWithChildren,
   ContactRoute: ContactRoute,
   PrivacyRoute: PrivacyRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  WriteForUsRoute: WriteForUsRoute,
+  YoutubeSeoRoute: YoutubeSeoRoute,
+  ApiMediaRoute: ApiMediaRoute,
   ApiProfileImageRoute: ApiProfileImageRoute,
   ApiThumbnailRoute: ApiThumbnailRoute,
   ToolsSlugRoute: ToolsSlugRoute,

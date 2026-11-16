@@ -11,7 +11,18 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import poppinsRegular from '@fontsource/poppins/files/poppins-latin-400-normal.woff2?url';
+import poppinsBold from '@fontsource/poppins/files/poppins-latin-700-normal.woff2?url';
+import poppinsExtraBold from '@fontsource/poppins/files/poppins-latin-800-normal.woff2?url';
 import { reportLovableError } from "../lib/lovable-error-reporting";
+
+const recoveryLinks = [
+  { label: "Monetization Checker", slug: "monetization-checker" },
+  { label: "Channel ID Finder", slug: "channel-id-finder" },
+  { label: "Tag Extractor", slug: "tag-extractor" },
+  { label: "Money Calculator", slug: "money-calculator" },
+  { label: "Thumbnail Viewer", slug: "thumbnail-viewer" },
+] as const;
 
 function NotFoundComponent() {
   return (
@@ -20,16 +31,29 @@ function NotFoundComponent() {
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          The page you're looking for doesn't exist or has been moved. Here is where you can go:
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+        <ul className="mt-6 flex flex-wrap justify-center gap-2">
+          {recoveryLinks.map((link) => (
+            <li key={link.slug}>
+              <Link
+                to="/tools/$slug"
+                params={{ slug: link.slug }}
+                className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+          <li>
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              All tools
+            </Link>
+          </li>
+        </ul>
       </div>
     </div>
   );
@@ -81,24 +105,42 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "YouTube Download Pro" },
-      { name: "description", content: "Download YouTube videos and audio fast." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "YouTube Download Pro" },
-      { property: "og:description", content: "Download YouTube videos and audio fast." },
+      { title: "VidsIQ – Free YouTube Creator Tools" },
+      { name: "description", content: "Free YouTube tools: check monetization eligibility, audit public channel data, generate metadata, and save permitted assets." },
+      { name: "application-name", content: "VidsIQ" },
+      { name: "apple-mobile-web-app-title", content: "VidsIQ" },
+      { property: "og:site_name", content: "VidsIQ" },
+      { property: "og:title", content: "VidsIQ – Free YouTube Creator Tools" },
+      { property: "og:description", content: "Free YouTube tools: check monetization eligibility, audit public channel data, generate metadata, and save permitted assets." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
+    scripts: [{
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'VidsIQ',
+        url: 'https://vidsiq.com/',
+        logo: 'https://vidsiq.com/icon-512.png',
+        description: 'Public YouTube channel research, metadata utilities, earnings calculators, and permitted asset downloads.',
+      }),
+    }],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: 'preload', as: 'font', type: 'font/woff2', href: poppinsRegular, crossOrigin: 'anonymous' },
+      { rel: 'preload', as: 'font', type: 'font/woff2', href: poppinsBold, crossOrigin: 'anonymous' },
+      { rel: 'preload', as: 'font', type: 'font/woff2', href: poppinsExtraBold, crossOrigin: 'anonymous' },
+      { rel: "preconnect", href: "https://i.ytimg.com" },
+      { rel: "preconnect", href: "https://yt3.ggpht.com" },
+      { rel: "preconnect", href: "https://yt3.googleusercontent.com" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+      { rel: "manifest", href: "/site.webmanifest" },
     ],
   }),
   shellComponent: RootShell,

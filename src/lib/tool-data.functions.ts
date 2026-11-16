@@ -1,14 +1,14 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { parseYouTubeInput } from './tool-engine';
-const requestSchema = z.object({ input: z.string().trim().min(1).max(2000), mode: z.enum(['video','channel','search','comments','history','rank','dislikes','channelSearch','report']), query: z.string().trim().max(200).default(''), pageToken: z.string().max(500).optional(), order: z.enum(['relevance','date','viewCount']).default('relevance') });
-export type PublicRecord = { recentUploads?: PublicRecord[]; uploadsError?: string; channelKeywords?: string;  id: string; title: string; description: string; thumbnail: string; channelId: string; channelTitle: string; publishedAt: string; views?: string | undefined; likes?: string | undefined; comments?: string | undefined; subscribers?: string | undefined; hiddenSubscribers?: boolean | undefined; videos?: string | undefined; duration?: string | undefined; tags: string[]; embeddable?: boolean | undefined; privacy?: string | undefined; ageRestricted?: boolean | undefined; uploads?: string | undefined; banner?: string | undefined; live?: string | undefined };
+const requestSchema = z.object({ input: z.string().trim().min(1).max(2000), mode: z.enum(['video','channel','search','comments','history','rank','dislikes','channelSearch','report','playlist']), query: z.string().trim().max(200).default(''), pageToken: z.string().max(500).optional(), order: z.enum(['relevance','date','viewCount']).default('relevance') });
+export type PublicRecord = { recentUploads?: PublicRecord[]; uploadsError?: string; channelKeywords?: string;  id: string; title: string; description: string; thumbnail: string; channelId: string; channelTitle: string; handle?: string | undefined; publishedAt: string; views?: string | undefined; likes?: string | undefined; comments?: string | undefined; subscribers?: string | undefined; hiddenSubscribers?: boolean | undefined; videos?: string | undefined; duration?: string | undefined; regionRestriction?: { allowed?: string[]; blocked?: string[] } | undefined; tags: string[]; embeddable?: boolean | undefined; privacy?: string | undefined; ageRestricted?: boolean | undefined; uploads?: string | undefined; banner?: string | undefined; live?: string | undefined };
 export type CommentRecord = { id: string; author: string; text: string; likes: number; publishedAt: string; replies: number };
 export type DataResponse = { records: PublicRecord[]; comments: CommentRecord[]; nextPageToken?: string | undefined; error?: string | undefined; status?: number | undefined; dislikes?: number | undefined; likes?: number | undefined };
-type ApiItem = { id?: string | undefined | { videoId?: string | undefined; channelId?: string | undefined }; snippet?: { title?: string | undefined; description?: string | undefined; channelId?: string | undefined; channelTitle?: string | undefined; publishedAt?: string | undefined; tags?: string[]; liveBroadcastContent?: string | undefined; thumbnails?: Record<string,{ url?: string | undefined }>; resourceId?: { videoId?: string | undefined }; topLevelComment?: { id?: string | undefined; snippet?: { authorDisplayName?: string | undefined; textOriginal?: string | undefined; likeCount?: number | undefined; publishedAt?: string | undefined } }; totalReplyCount?: number | undefined }; statistics?: { viewCount?: string | undefined; likeCount?: string | undefined; commentCount?: string | undefined; subscriberCount?: string | undefined; hiddenSubscriberCount?: boolean | undefined; videoCount?: string | undefined }; contentDetails?: { duration?: string | undefined; contentRating?: { ytRating?: string | undefined }; relatedPlaylists?: { uploads?: string | undefined } }; status?: { privacyStatus?: string | undefined; embeddable?: boolean | undefined }; brandingSettings?: { channel?: { keywords?: string }; image?: { bannerExternalUrl?: string | undefined } } };
+type ApiItem = { id?: string | undefined | { videoId?: string | undefined; channelId?: string | undefined }; snippet?: { title?: string | undefined; description?: string | undefined; channelId?: string | undefined; channelTitle?: string | undefined; publishedAt?: string | undefined; customUrl?: string | undefined; tags?: string[]; liveBroadcastContent?: string | undefined; thumbnails?: Record<string,{ url?: string | undefined }>; resourceId?: { videoId?: string | undefined }; topLevelComment?: { id?: string | undefined; snippet?: { authorDisplayName?: string | undefined; textOriginal?: string | undefined; likeCount?: number | undefined; publishedAt?: string | undefined } }; totalReplyCount?: number | undefined }; statistics?: { viewCount?: string | undefined; likeCount?: string | undefined; commentCount?: string | undefined; subscriberCount?: string | undefined; hiddenSubscriberCount?: boolean | undefined; videoCount?: string | undefined }; contentDetails?: { regionRestriction?: { allowed?: string[]; blocked?: string[] }; duration?: string | undefined; contentRating?: { ytRating?: string | undefined }; relatedPlaylists?: { uploads?: string | undefined } }; status?: { privacyStatus?: string | undefined; embeddable?: boolean | undefined }; brandingSettings?: { channel?: { keywords?: string }; image?: { bannerExternalUrl?: string | undefined } } };
 function record(v: ApiItem): PublicRecord {
  const s=v.snippet; const stats=v.statistics;
- return { id: typeof v.id === 'string' ? v.id : v.id?.videoId ?? v.id?.channelId ?? s?.resourceId?.videoId ?? '', title:s?.title ?? '',description:s?.description ?? '',thumbnail:s?.thumbnails?.['high']?.url ?? s?.thumbnails?.['medium']?.url ?? s?.thumbnails?.['default']?.url ?? '',channelId:s?.channelId ?? '',channelTitle:s?.channelTitle ?? '',publishedAt:s?.publishedAt ?? '',views:stats?.viewCount,likes:stats?.likeCount,comments:stats?.commentCount,subscribers:stats?.subscriberCount,hiddenSubscribers:stats?.hiddenSubscriberCount,videos:stats?.videoCount,duration:v.contentDetails?.duration,tags:s?.tags ?? [],embeddable:v.status?.embeddable,privacy:v.status?.privacyStatus,ageRestricted:v.contentDetails?.contentRating?.ytRating === 'ytAgeRestricted',uploads:v.contentDetails?.relatedPlaylists?.uploads,banner:v.brandingSettings?.image?.bannerExternalUrl,live:s?.liveBroadcastContent };
+ return { ...(v.brandingSettings?.channel?.keywords ? { channelKeywords: v.brandingSettings.channel.keywords } : {}), id: typeof v.id === 'string' ? v.id : v.id?.videoId ?? v.id?.channelId ?? s?.resourceId?.videoId ?? '', title:s?.title ?? '',description:s?.description ?? '',thumbnail:s?.thumbnails?.['high']?.url ?? s?.thumbnails?.['medium']?.url ?? s?.thumbnails?.['default']?.url ?? '',channelId:s?.channelId ?? '',channelTitle:s?.channelTitle ?? '',handle:s?.customUrl,publishedAt:s?.publishedAt ?? '',views:stats?.viewCount,likes:stats?.likeCount,comments:stats?.commentCount,subscribers:stats?.subscriberCount,hiddenSubscribers:stats?.hiddenSubscriberCount,videos:stats?.videoCount,duration:v.contentDetails?.duration,tags:s?.tags ?? [],embeddable:v.status?.embeddable,privacy:v.status?.privacyStatus,regionRestriction:v.contentDetails?.regionRestriction,ageRestricted:v.contentDetails ? v.contentDetails?.contentRating?.ytRating === 'ytAgeRestricted' : undefined,uploads:v.contentDetails?.relatedPlaylists?.uploads,banner:v.brandingSettings?.image?.bannerExternalUrl,live:s?.liveBroadcastContent };
 }
 export const getToolData = createServerFn({ method:'POST' }).inputValidator((data:unknown) => requestSchema.parse(data)).handler(async ({data}):Promise<DataResponse> => {
  const empty={records:[],comments:[]};
@@ -23,14 +23,25 @@ export const getToolData = createServerFn({ method:'POST' }).inputValidator((dat
   }
   const key=process.env['UDC_YOUTUBE_DATA_API_2_API_KEY']; const lovableKey=process.env['LOVABLE_API_KEY'];
   if(!key || !lovableKey) return {...empty,error:'The YouTube connection is not configured.'};
+  const { cachedPublicJson } = await import('./public-data-cache.server');
   async function api(endpoint:string,params:Record<string,string>) {
-   const response=await fetch(`https://connector-gateway.lovable.dev/udc_youtube_data_api_2/youtube/v3/${endpoint}?${new URLSearchParams(params)}`,{headers:{Authorization:`Bearer ${lovableKey}`,'X-Connection-Api-Key':key ?? ''},signal:AbortSignal.timeout(20000)});
-   if(!response.ok) { const body=await response.text(); console.error('YouTube request failed',response.status,body); throw new Error(`YouTube could not complete this request (${response.status}). Check API access, quota, or whether comments are enabled.`); }
-   return await response.json() as {items?:ApiItem[];nextPageToken?:string};
+   const url=`https://connector-gateway.lovable.dev/udc_youtube_data_api_2/youtube/v3/${endpoint}?${new URLSearchParams(Object.entries(params).sort(([a],[b])=>a.localeCompare(b)))}`;
+   return cachedPublicJson(url,endpoint,async()=>{
+    const response=await fetch(url,{headers:{Authorization:`Bearer ${lovableKey}`,'X-Connection-Api-Key':key ?? ''},signal:AbortSignal.timeout(20000)});
+    if(!response.ok) { const body=await response.text(); console.error('YouTube request failed',response.status,body); throw new Error(`YouTube could not complete this request (${response.status}). Check API access, quota, or whether comments are enabled.`); }
+    return await response.json() as {items?:ApiItem[];nextPageToken?:string};
+   });
   }
   if(data.mode==='search' || data.mode==='rank' || data.mode==='channelSearch') {
    const x=await api('search',{part:'snippet',q:data.query || parsed.value,type:data.mode==='channelSearch' ? 'channel' : 'video',maxResults:'50',order:data.order,...(data.pageToken?{pageToken:data.pageToken}:{})});
    return {...empty,records:(x.items ?? []).map(record),nextPageToken:x.nextPageToken};
+  }
+  if(data.mode==='playlist') {
+   if(!parsed.playlist) return {...empty,error:'Enter a YouTube playlist link (it contains list=).'};
+   const x=await api('playlistItems',{part:'snippet',playlistId:parsed.playlist,maxResults:'50',...(data.pageToken?{pageToken:data.pageToken}:{})});
+   const items=(x.items??[]).map(v=>record({...v,id:v.snippet?.resourceId?.videoId ?? ''})).filter(v=>v.id&&v.title!=='Private video'&&v.title!=='Deleted video');
+   if(!items.length&&!data.pageToken) return {...empty,error:'This playlist is empty, private, or unavailable.'};
+   return {...empty,records:items,nextPageToken:x.nextPageToken};
   }
   if(data.mode==='comments') {
    if(parsed.kind!=='video') return {...empty,error:'Enter a video URL or ID to load comments.'};
@@ -77,4 +88,22 @@ export const getToolData = createServerFn({ method:'POST' }).inputValidator((dat
   }
   return {...empty,records:channel.items.map(record)};
  } catch(e) { return {...empty,error:e instanceof Error ? e.message : 'The tool request could not complete. Please try again.'}; }
+});
+const downloadSchema = z.object({ url: z.string().trim().min(1).max(2000), mode: z.enum(['audio','video']), quality: z.enum(['1080','720','480','360']).default('720'), attempt: z.number().int().min(0).max(5).default(0) });
+const COBALT_INSTANCES=['https://co.otomir23.me/','https://api.cobalt.liubquanti.click/'];
+export type MediaDownloadResponse = { next?: number | undefined; url?: string | undefined; filename?: string | undefined; error?: string | undefined };
+export const getMediaDownload = createServerFn({ method:'POST' }).inputValidator((d:unknown) => downloadSchema.parse(d)).handler(async ({data}):Promise<MediaDownloadResponse> => {
+ try {
+  const parsed=parseYouTubeInput(data.url);
+  if(parsed.kind!=='video') return {error:'Enter a video link or video ID.'};
+  const watchUrl=`https://www.youtube.com/watch?v=${parsed.value}`;
+  const body=data.mode==='audio' ? {url:watchUrl,downloadMode:'audio',audioFormat:'mp3'} : {url:watchUrl,videoQuality:data.quality};
+  let result:{status?:string;url?:string;filename?:string}={};
+  for(let i=data.attempt;i<COBALT_INSTANCES.length;i++){
+   try{const response=await fetch(COBALT_INSTANCES[i] ?? COBALT_INSTANCES[0] ?? '',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
+    if(!response.ok)continue;const r=await response.json() as typeof result;if(r.status==='tunnel'&&r.url){result={...r};return {url:r.url,filename:r.filename ?? 'download',next:i+1<COBALT_INSTANCES.length?i+1:undefined};}}catch{}
+  }
+  if(!result.url) return {error:'The download service is unavailable right now. Please try again later.'};
+  return {url:result.url,filename:result.filename ?? 'download'};
+ } catch { return {error:'The download service is unavailable right now. Please try again later.'}; }
 });
