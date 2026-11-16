@@ -24,4 +24,7 @@ export default defineConfig({
     ],
     prerender: { enabled: true, autoStaticPathsDiscovery: false },
   },
+  // `bun run build:node` (BUILD_TARGET=node) produces a plain Node server for VPS
+  // hosting in dist/; the default build keeps the hosting platform target.
+  ...(process.env["BUILD_TARGET"] === "node" ? { nitro: { preset: "node-server" } } : {}),
 });

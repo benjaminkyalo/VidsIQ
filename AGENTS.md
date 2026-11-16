@@ -33,7 +33,7 @@ use the editor.
 - Keep the creator tool catalog in a browser-safe shared module and use the shared site shell for content routes, so tool names and navigation remain consistent.
 - Tool selection must not fabricate analytics or download progress; unconnected tools show an explicit unavailable state, while browser-safe thumbnail and link utilities can resolve public video IDs.
 - Keep input parsing and calculator formulas in the shared, tested tool engine; render tool workflows in a reusable inline workspace below the action form, so reports follow the screenshot layout.
-- Retrieve public YouTube records through server functions using the linked connector gateway; deliver image downloads through validated, host-allowlisted same-origin server routes.
+- Retrieve public YouTube records through server functions, calling the YouTube API directly when GOOGLE_API_KEY (or YOUTUBE_API_KEY) is set and falling back to the connector gateway, so the same code runs on any host; deliver image downloads through validated, host-allowlisted same-origin server routes.
 
 - Derive report averages and earnings scenarios in the tested shared engine using elapsed channel age; never infer actual monetization or current revenue from lifetime totals.
 - Every catalog tool has its own page at /tools/<slug> (slug derived by toolSlug in the shared catalog) reusing the shared ToolAction form, so each tool is indexable and linkable.
@@ -45,7 +45,7 @@ use the editor.
 - Accept player events only from the current YouTube iframe and use supported caption-module commands; reset controls per video to avoid stale playback settings.
 
 - Render all site images through SiteImage with explicit intrinsic dimensions; default to lazy loading and asynchronous decoding, and prioritize only immediately needed imagery to avoid offscreen competition.
-- For new uploaded site artwork, generate appropriately sized modern-format renditions before CDN upload and supply responsive srcSet/sizes; keep original-quality image downloads separate from display optimization.
+- Site artwork lives as plain files in public/ with responsive srcSet/sizes, not CDN asset pointers: the /__l5e/ pointer URLs only resolve on Lovable hosting and 404 on the self-hosted VPS.
 - Self-host interface fonts through Fontsource with swap rendering and preload first-screen weights; avoid transformed text cards and blurred control surfaces to keep rendering stable without external font requests.
 - Prerender only explicitly enumerated visitor-independent public pages, deriving tool paths from the catalog and disabling automatic discovery; keep submissions and media endpoints dynamic so cached HTML never captures user data.
 - Share paste-time image previews between homepage and tool forms: derive video thumbnails locally and debounce explicit channel lookups with query reuse, avoiding speculative topic searches.

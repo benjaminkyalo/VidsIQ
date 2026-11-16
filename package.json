@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "build:node": "env -u DEV_SERVER__PROJECT_PATH -u LOVABLE_SANDBOX BUILD_TARGET=node vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",

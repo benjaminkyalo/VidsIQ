@@ -21,13 +21,14 @@ export const getToolData = createServerFn({ method:'POST' }).inputValidator((dat
    const result=await r.json() as {dislikes?:number;likes?:number};
    return {...empty,dislikes:result.dislikes,likes:result.likes};
   }
-  const key=process.env['UDC_YOUTUBE_DATA_API_2_API_KEY']; const lovableKey=process.env['LOVABLE_API_KEY'];
-  if(!key || !lovableKey) return {...empty,error:'The YouTube connection is not configured.'};
+  const googleKey=process.env['GOOGLE_API_KEY'] || process.env['YOUTUBE_API_KEY']; const key=process.env['UDC_YOUTUBE_DATA_API_2_API_KEY']; const lovableKey=process.env['LOVABLE_API_KEY'];
+  if(!googleKey && (!key || !lovableKey)) return {...empty,error:'The YouTube connection is not configured.'};
   const { cachedPublicJson } = await import('./public-data-cache.server');
   async function api(endpoint:string,params:Record<string,string>) {
-   const url=`https://connector-gateway.lovable.dev/udc_youtube_data_api_2/youtube/v3/${endpoint}?${new URLSearchParams(Object.entries(params).sort(([a],[b])=>a.localeCompare(b)))}`;
+   const qs=new URLSearchParams(Object.entries(params).sort(([a],[b])=>a.localeCompare(b)));
+   const url=`https://connector-gateway.lovable.dev/udc_youtube_data_api_2/youtube/v3/${endpoint}?${qs}`;
    return cachedPublicJson(url,endpoint,async()=>{
-    const response=await fetch(url,{headers:{Authorization:`Bearer ${lovableKey}`,'X-Connection-Api-Key':key ?? ''},signal:AbortSignal.timeout(20000)});
+     const response=googleKey ? await fetch(`https://www.googleapis.com/youtube/v3/${endpoint}?${qs}&key=${encodeURIComponent(googleKey)}`,{signal:AbortSignal.timeout(20000)}) : await fetch(url,{headers:{Authorization:`Bearer ${lovableKey}`,'X-Connection-Api-Key':key ?? ''},signal:AbortSignal.timeout(20000)});
     if(!response.ok) { const body=await response.text(); console.error('YouTube request failed',response.status,body); throw new Error(`YouTube could not complete this request (${response.status}). Check API access, quota, or whether comments are enabled.`); }
     return await response.json() as {items?:ApiItem[];nextPageToken?:string};
    });

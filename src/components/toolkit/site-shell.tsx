@@ -5,12 +5,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { featuredTools, toolSlug, type Tool } from '@/lib/tools';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { SiteImage } from '@/components/toolkit/site-image';
-import logoFallback from '@/assets/vidsiq-transparent-logo-480.png.asset.json';
-import logo480 from '@/assets/vidsiq-transparent-logo-480.webp.asset.json';
-import logo960 from '@/assets/vidsiq-transparent-logo-960.webp.asset.json';
-
+// Logo lives in public/ as plain files so it loads on any host, not only on
+// Lovable's asset CDN (the /__l5e/ pointer URLs 404 on a self-hosted VPS).
 export function Brand({ priority = false }: { priority?: boolean }) {
-  return <span className="brand"><SiteImage src={logoFallback.url} webpSrcSet={`${logo480.url} 480w, ${logo960.url} 960w`} sizes="(max-width: 380px) 110px, (max-width: 640px) 118px, 140px" width={480} height={129} className="brand-logo" alt="VidsIQ" priority={priority} /></span>;
+  return <span className="brand"><SiteImage src="/logo-480.png" webpSrcSet="/logo-480.webp 480w, /logo-960.webp 960w" sizes="(max-width: 380px) 110px, (max-width: 640px) 118px, 140px" width={480} height={129} className="brand-logo" alt="VidsIQ" priority={priority} /></span>;
 }
 
 // Brings the "Channel checks and creator research" section into view. The router

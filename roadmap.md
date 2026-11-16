@@ -71,3 +71,9 @@
 - [x] Improve shared video result summaries with views, likes, comments, readable duration, publication details, and export/copy actions; preserve the existing channel report.
 - [x] Add at least ten relevant questions and answers to every individual tool page, with tool-specific purpose and limitations. Answers render in initial HTML; these are useful FAQs, not a verified global top-ten search ranking.
 - [x] Verify the screenshot’s real video: privacy public, duration 1:35:04, blocked BY/RU; copy/export, missing-video guidance, country selection, and real Video Viewer export pass. All 69 pages return 200 with ten FAQs, phone overflow absent, 39 tests pass, latest build OK. YouTube requires bot-verification sign-in in the test browser, so embedded playback itself is not verified. Other tools retain existing workflows; this first pass does not establish screenshot parity for tools not pictured.
+
+# VPS hosting
+- [ ] Node build target, direct YouTube/AI providers, env template, DEPLOY.md, verify
+- [ ] Push to GitHub so VPS deploy is a simple git pull + build + restart flow
+
+- [ ] VPS: push Node build + DEPLOY.md + AI provider switch to GitHub (in progress)
