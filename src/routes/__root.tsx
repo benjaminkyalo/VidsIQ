@@ -15,6 +15,7 @@ import poppinsRegular from '@fontsource/poppins/files/poppins-latin-400-normal.w
 import poppinsBold from '@fontsource/poppins/files/poppins-latin-700-normal.woff2?url';
 import poppinsExtraBold from '@fontsource/poppins/files/poppins-latin-800-normal.woff2?url';
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { initAnalytics, trackPageView } from "../lib/analytics";
 
 const recoveryLinks = [
   { label: "Monetization Checker", slug: "monetization-checker" },
@@ -165,6 +166,14 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    initAnalytics();
+    return router.subscribe("onResolved", ({ toLocation }) => {
+      trackPageView(toLocation.pathname + toLocation.searchStr);
+    });
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>

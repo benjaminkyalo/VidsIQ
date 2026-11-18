@@ -59,15 +59,15 @@ export const additionalTools = [
   { name: 'Transcript Generator', icon: FileText, description: 'Get the full timestamped transcript of a video with captions, then search, copy, or export it as text.' },
   { name: 'Subtitle Downloader', icon: Captions, description: 'Download a video’s captions as SRT, VTT, or plain text in any available language.' },
   { name: 'Video Summarizer', icon: Sparkles, description: 'Get an AI-powered summary of a captioned video: a one-line TL;DR, key points, and the main takeaway.' },
-  { name: 'Playlist Downloader', icon: ListVideo, description: 'List every video in a public playlist and save permitted items as MP3 or MP4, one by one.' },
+  { name: 'Playlist Downloader', icon: ListVideo, description: 'Download a whole public YouTube playlist as MP3 or MP4 — pick a quality, select videos or save them all in one click.' },
   { name: 'Subscriber Count', icon: Users, description: 'See any channel’s public subscriber count, total views, and video count from a link or @handle.' },
   { name: 'Tag Generator', icon: Tags, description: 'Get AI-suggested video tags from a topic or video link, ready to copy as a comma-separated list.' },
   { name: 'Title Generator', icon: Type, description: 'Get ten AI-written title ideas in different styles for your next video, each under 70 characters.' },
   { name: 'Description Generator', icon: AlignLeft, description: 'Draft a complete video description with a hook, chapter outline, call to subscribe, and hashtags.' },
   { name: 'Channel Name Generator', icon: BadgeCheck, description: 'Brainstorm short, brandable channel names for your niche, then check availability on YouTube.' },
   { name: 'Shorts to MP3', icon: Music, description: 'Save the audio of a permitted YouTube Short as an MP3 file from its link.' },
-  { name: 'YouTube to MP3', icon: Music, description: 'Paste a YouTube link and save its audio as an MP3 file in one step, on phone or desktop.' },
-  { name: 'YouTube to MP4', icon: Video, description: 'Paste a YouTube link and save the video as an MP4 in 1080p, 720p, 480p, or 360p.' },
+  { name: 'YouTube to MP3', icon: Music, description: 'Free online YouTube to MP3 converter: paste a link and download the audio as an MP3 in one step, on phone or desktop.' },
+  { name: 'YouTube to MP4', icon: Video, description: 'Free online YouTube to MP4 downloader: paste a link and save the video in 1080p, 720p, 480p, or 360p.' },
   { name: 'Thumbnail Downloader', icon: Image, description: 'Save a video’s available thumbnail as an image file, separate from its video download.' },
 ];
 export const allTools = [...essentialTools, ...additionalTools, { name: 'Video Downloader', icon: Download, description: 'Request an MP4 quality for a video you own or may download. Some sources cannot be converted.' }, { name: 'Audio Downloader', icon: Music, description: 'Extract MP3 audio from permitted video content; long recordings may fail at the external conversion service.' }];
@@ -83,3 +83,6 @@ export const featuredToolNames = ['Monetization Checker','Subscriber Count','You
 export const featuredTools = featuredToolNames.map(n => allTools.find(t => t.name === n)!);
 export const toolSlug = (name: string) => name.toLowerCase().replace(/[–—]/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 export const findToolBySlug = (slug: string) => allTools.find(t => toolSlug(t.name) === slug);
+
+/** Priority tools promoted sitewide (homepage strip, footer) for search visibility. */
+export const priorityTools = ['Monetization Checker','YouTube to MP3','YouTube to MP4','YouTube Without Ads'] as const;

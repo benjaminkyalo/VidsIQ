@@ -134,10 +134,26 @@ Replace the `location /` block with:
 
 ```nginx
 server {
-    listen 443 ssl;
+    listen 443 ssl http2;
     server_name vidsiq.com www.vidsiq.com;
 
     # keep your existing ssl_certificate / ssl_certificate_key lines
+
+    # Fast images & files: compress text, cache static files for a year
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    location /assets/ {
+        proxy_pass http://127.0.0.1:3000;
+        expires 1y;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    location ~* \.(webp|avif|png|jpg|jpeg|gif|svg|ico|woff2)$ {
+        proxy_pass http://127.0.0.1:3000;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -183,6 +199,10 @@ That's the whole update cycle — four lines.
 ---
 
 ## Troubleshooting
+
+Dedicated MP3, MP4 and Shorts conversion on this VPS is documented in
+[`services/converter/README.md`](services/converter/README.md), including
+isolated workers, private credentials, file validation and live acceptance checks.
 
 | Symptom | Cause / fix |
 | --- | --- |

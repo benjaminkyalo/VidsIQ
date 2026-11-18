@@ -90,21 +90,30 @@ export const getToolData = createServerFn({ method:'POST' }).inputValidator((dat
   return {...empty,records:channel.items.map(record)};
  } catch(e) { return {...empty,error:e instanceof Error ? e.message : 'The tool request could not complete. Please try again.'}; }
 });
-const downloadSchema = z.object({ url: z.string().trim().min(1).max(2000), mode: z.enum(['audio','video']), quality: z.enum(['1080','720','480','360']).default('720'), attempt: z.number().int().min(0).max(5).default(0) });
+const downloadSchema = z.object({ url: z.string().trim().min(1).max(2000), mode: z.enum(['audio','video']), quality: z.enum(['1080','720','480','360']).default('720'), bitrate: z.enum(['128','192','320']).default('192'), attempt: z.number().int().min(0).max(5).default(0), job: z.string().regex(/^[a-f0-9]{32}\.[a-f0-9]{64}$/).optional() });
 const COBALT_INSTANCES=['https://co.otomir23.me/','https://api.cobalt.liubquanti.click/'];
-export type MediaDownloadResponse = { next?: number | undefined; url?: string | undefined; filename?: string | undefined; error?: string | undefined };
+export type MediaDownloadResponse = { next?: number | undefined; url?: string | undefined; filename?: string | undefined; error?: string | undefined; job?: string | undefined; state?: 'queued'|'processing'|'ready'|'error' | undefined; size?: number | undefined; dedicated?: boolean | undefined };
 export const getMediaDownload = createServerFn({ method:'POST' }).inputValidator((d:unknown) => downloadSchema.parse(d)).handler(async ({data}):Promise<MediaDownloadResponse> => {
  try {
   const parsed=parseYouTubeInput(data.url);
   if(parsed.kind!=='video') return {error:'Enter a video link or video ID.'};
-  const watchUrl=`https://www.youtube.com/watch?v=${parsed.value}`;
-  const body=data.mode==='audio' ? {url:watchUrl,downloadMode:'audio',audioFormat:'mp3'} : {url:watchUrl,videoQuality:data.quality};
-  let result:{status?:string;url?:string;filename?:string}={};
-  for(let i=data.attempt;i<COBALT_INSTANCES.length;i++){
-   try{const response=await fetch(COBALT_INSTANCES[i] ?? COBALT_INSTANCES[0] ?? '',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
-    if(!response.ok)continue;const r=await response.json() as typeof result;if(r.status==='tunnel'&&r.url){result={...r};return {url:r.url,filename:r.filename ?? 'download',next:i+1<COBALT_INSTANCES.length?i+1:undefined};}}catch{}
+  const serviceUrl=process.env['CONVERSION_SERVICE_URL'];
+  const serviceKey=process.env['CONVERTER_API_KEY'];
+  if(serviceUrl || serviceKey || data.job){
+   if(!serviceUrl || !serviceKey)return {error:'The dedicated conversion service is not fully configured.'};
+   const {requestConversion}=await import('./conversion-service');
+   try{
+    const job=await requestConversion({url:serviceUrl,key:serviceKey},{video_id:parsed.value,mode:data.mode,quality:data.quality,bitrate:data.bitrate},data.job);
+    return {dedicated:true,job:job.ticket,state:job.state,filename:job.filename,size:job.size,error:job.error};
+   }catch(error){return {dedicated:true,error:error instanceof Error?error.message:'Conversion unavailable.'};}
   }
-  if(!result.url) return {error:'The download service is unavailable right now. Please try again later.'};
-  return {url:result.url,filename:result.filename ?? 'download'};
+  const watchUrl=`https://www.youtube.com/watch?v=${parsed.value}`;
+  const body=data.mode==='audio' ? {url:watchUrl,downloadMode:'audio',audioFormat:'mp3',audioBitrate:data.bitrate} : {url:watchUrl,videoQuality:data.quality};
+  // Race every remaining service at once and keep the first ready file, so one slow host never delays the user.
+  const ask=async(i:number)=>{const response=await fetch(COBALT_INSTANCES[i] ?? '',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(12000)});
+   if(!response.ok)throw new Error('bad');const r=await response.json() as {status?:string;url?:string;filename?:string};if(r.status!=='tunnel'||!r.url)throw new Error('none');return {i,url:r.url,filename:r.filename ?? 'download'};};
+  const order=COBALT_INSTANCES.map((_,i)=>i).filter(i=>i>=data.attempt);
+  try{const w=await Promise.any(order.map(ask));const rest=order.filter(i=>i!==w.i&&i>data.attempt-1&&i>w.i);return {url:w.url,filename:w.filename,next:rest[0]};}
+  catch{return {error:'The download service is unavailable right now. Please try again later.'};}
  } catch { return {error:'The download service is unavailable right now. Please try again later.'}; }
 });

@@ -22,3 +22,21 @@ it('stops an active stream at the 60-second deadline', async () => {
   await assertion;
   expect(get).toHaveBeenCalledTimes(1);
 });
+it('waits for a dedicated conversion and verifies delivered byte count', async () => {
+  vi.useFakeTimers();
+  const job='a'.repeat(32)+'.'+'b'.repeat(64);
+  const get=vi.fn().mockResolvedValueOnce({dedicated:true,job,state:'queued'}).mockResolvedValueOnce({dedicated:true,job,state:'processing'}).mockResolvedValueOnce({dedicated:true,job,state:'ready',filename:'verified.mp4',size:2048});
+  const fetch=vi.fn().mockResolvedValue(new Response(new Uint8Array(2048),{headers:{'content-type':'video/mp4'}}));
+  vi.stubGlobal('fetch',fetch);
+  const result=fetchMedia(get,'jNQXAC9IVRw','video','720',()=>{});
+  await vi.advanceTimersByTimeAsync(2000);
+  expect((await result).blob.size).toBe(2048);
+  expect(fetch).toHaveBeenCalledWith(`/api/media?job=${job}`,expect.anything());
+  expect(get).toHaveBeenCalledTimes(3);
+});
+it('rejects an incomplete dedicated file without a free-service retry', async () => {
+  const get=vi.fn().mockResolvedValue({dedicated:true,job:'a'.repeat(32)+'.'+'b'.repeat(64),state:'ready',size:4096});
+  vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(new Uint8Array(2048),{headers:{'content-type':'audio/mpeg'}})));
+  await expect(fetchMedia(get,'jNQXAC9IVRw','audio','720',()=>{})).rejects.toThrow('incomplete');
+  expect(get).toHaveBeenCalledTimes(1);
+});

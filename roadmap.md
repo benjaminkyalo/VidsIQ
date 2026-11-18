@@ -1,4 +1,10 @@
 # Transparent brand logo
+# Dedicated conversion service
+- [x] Build isolated conversion workers, bounded queue, file validation, cache, and authenticated delivery.
+- [x] Connect MP3, MP4, Shorts and shared download workflows to dedicated jobs without free-service fallback when configured.
+- [x] Verify service tests, real YouTube MP3/MP4 worker conversion and file validation; test all three downloader pages plus Save again at desktop/phone widths using a temporary browser-to-worker bridge. Actual files saved, no overflow/errors; new short conversions about four seconds and cached deliveries under one second locally. Document VPS installation and operating limits.
+- [ ] Activate and benchmark live conversions — requires installation on the owner's VPS and private service credentials; no VPS access is connected. Production website-to-service connection, container build and real Shorts source coverage remain unverified; local browser acceptance used the same 19-second public video on all three pages, not a real Shorts upload.
+
 - [x] Improve and verify all six AI flows: titles, tags, channel names, descriptions, summaries, and SEO rewrites returned real results; copy and stale-output clearing verified. Removed AI timer cancellation and unsafe retries; enforced title/tag limits. All 59 tests pass and build is clean.
 - [x] Correct caption commands, validate iframe messages, include player origin/referrer, reset controls per video, and verify theater/Escape plus mobile fit without publishing.
 - [ ] Confirm actual playback, captions, and speed changes — blocked by YouTube’s bot-verification screen in the test browser; no restriction bypass attempted. Other tools are deferred by the owner.
@@ -77,3 +83,8 @@
 - [ ] Push to GitHub so VPS deploy is a simple git pull + build + restart flow
 
 - [ ] VPS: push Node build + DEPLOY.md + AI provider switch to GitHub (in progress)
+
+# Google Search Console + Analytics (Nov 17 2026)
+- [ ] Connect Google Search Console, verify vidsiq.com via META tag, submit sitemap.
+- [ ] Add Google Analytics (gtag) tracking with user's GA4 Measurement ID.
+- [ ] Keyword strategy: capture "youtube mp3/mp4 downloader" demand (user screenshots show vidsiq.com already indexed in Google).

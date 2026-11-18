@@ -12,6 +12,8 @@ export function ToolAction({ initialTool, initialInput = '' }: { initialTool: st
   const [tool, setTool] = useState(initialTool);
   const [url, setUrl] = useState(initialInput);
   const [error, setError] = useState('');
+  // Preload the result panel while the browser is idle so the first submit feels instant.
+  useEffect(() => { const w = window as Window & { requestIdleCallback?: (cb: () => void) => number }; if (w.requestIdleCallback) w.requestIdleCallback(warmToolWorkspace); else setTimeout(warmToolWorkspace, 1500); }, []);
   const { submitted, submit: submitInput } = useToolSubmission(tool, url);
   const input = useRef<HTMLInputElement>(null);
 

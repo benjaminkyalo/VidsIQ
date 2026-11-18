@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Application structure
+- Run dedicated media conversion only in the isolated VPS service; website handlers call its authenticated job API and proxy validated ticket files, never spawn processes or silently fall back when configured.
 - Keep the creator tool catalog in a browser-safe shared module and use the shared site shell for content routes, so tool names and navigation remain consistent.
 - Tool selection must not fabricate analytics or download progress; unconnected tools show an explicit unavailable state, while browser-safe thumbnail and link utilities can resolve public video IDs.
 - Keep input parsing and calculator formulas in the shared, tested tool engine; render tool workflows in a reusable inline workspace below the action form, so reports follow the screenshot layout.
