@@ -59,3 +59,4 @@ use the editor.
 - Player recommendations reuse cached public channel-report uploads without blocking playback and link to the same player tool; they are recent channel uploads, not YouTube's personalized suggestions.
 - Keep watch-page search guidance in initial HTML via the shared ToolGuide and its dedicated guide module, with tool-specific search identity overrides; preserve playback behavior when improving discoverability.
 - Keep task-specific search guidance and related-tool choices in the browser-safe search-content catalog; render it in initial HTML and derive title intent from it to avoid generic cross-page filler without changing tool workflows.
+- Server function auth uses the local optionalSupabaseAuth middleware, never the generated attacher, because self-hosted builds lack browser backend settings and must not fail every tool request.

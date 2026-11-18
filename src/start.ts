@@ -1,7 +1,7 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
-import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
+import { optionalSupabaseAuth } from "./lib/optional-supabase-auth";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -31,7 +31,9 @@ const csrfMiddleware = createCsrfMiddleware({
 // requireSupabaseAuth server functions need. Add it by hand only if the Cloud backend or a
 // user-managed Supabase project is connected, no middleware here sets Authorization, and the
 // project did not intentionally replace it.
+// This project intentionally replaces the generated attacher with optionalSupabaseAuth so
+// self-hosted builds without backend settings keep working; do not restore attachSupabaseAuth.
 export const startInstance = createStart(() => ({
-  functionMiddleware: [attachSupabaseAuth],
+  functionMiddleware: [optionalSupabaseAuth],
   requestMiddleware: [errorMiddleware, csrfMiddleware],
 }));
