@@ -8,9 +8,12 @@ declare global {
   }
 }
 
-const measurementId = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY"] as
-  | string
-  | undefined;
+// The measurement ID is public. Keep a built-in fallback because self-hosted builds
+// (the VPS) are made from GitHub without the hosting-provided environment file.
+const VIDSIQ_MEASUREMENT_ID = "G-4M2BJ0JGN2";
+const measurementId =
+  (import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY"] as string | undefined) ||
+  VIDSIQ_MEASUREMENT_ID;
 
 let initialized = false;
 
