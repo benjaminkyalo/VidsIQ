@@ -57,7 +57,9 @@ def command(data: ConversionRequest, folder: Path, settings: Settings):
                  '--audio-quality', data.bitrate + 'K']
     else:
         height = data.quality
-        args += ['--format', f'bestvideo[ext=mp4][vcodec^=avc1][height<={height}]+bestaudio[ext=m4a]/best[ext=mp4][vcodec^=avc1][acodec^=mp4a][height<={height}]',
+        # Prefer an exact-height progressive MP4 when available: one download and no merge.
+        # The original separate-stream and lower-resolution fallbacks remain unchanged.
+        args += ['--format', f'best[ext=mp4][vcodec^=avc1][acodec^=mp4a][height={height}]/bestvideo[ext=mp4][vcodec^=avc1][height<={height}]+bestaudio[ext=m4a]/best[ext=mp4][vcodec^=avc1][acodec^=mp4a][height<={height}]',
                  '--merge-output-format', 'mp4', '--postprocessor-args', 'ffmpeg:-threads 2 -movflags +faststart']
     args.append(f'https://www.youtube.com/watch?v={data.video_id}')
     return args
@@ -93,7 +95,7 @@ def convert(data: ConversionRequest, folder: Path, settings: Settings):
                     raise TimeoutError('Conversion deadline')
                 if sum(p.stat().st_size for p in folder.rglob('*') if p.is_file()) > settings.max_bytes * 3:
                     raise ValueError('Temporary files exceeded budget')
-                time.sleep(0.25)
+                time.sleep(0.1)
             if process.returncode != 0:
                 raise ValueError('Upstream unavailable')
         finally:

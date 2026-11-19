@@ -1,5 +1,6 @@
 # Transparent brand logo
 # Dedicated conversion service
+- [x] Improve download speed without changing the workflow: quick initial status checks, lower completion-detection delay, no unnecessary browser chunk copies, and exact-quality progressive MP4 fast path with existing fallbacks and validation preserved. Five converter tests and 64 site tests pass; real browser saves produced valid MP3/MP4 files, a 0.16-second cached repeat, and no desktop/mobile errors. Live VPS timings require deployment by the owner.
 - [x] Build isolated conversion workers, bounded queue, file validation, cache, and authenticated delivery.
 - [x] Connect MP3, MP4, Shorts and shared download workflows to dedicated jobs without free-service fallback when configured.
 - [x] Verify service tests, real YouTube MP3/MP4 worker conversion and file validation; test all three downloader pages plus Save again at desktop/phone widths using a temporary browser-to-worker bridge. Actual files saved, no overflow/errors; new short conversions about four seconds and cached deliveries under one second locally. Document VPS installation and operating limits.
@@ -82,7 +83,7 @@
 - [x] Add permanent PM2 startup loading `/etc/vidsiq.env`, converter health/settings verification without secret output, boot persistence instructions, and current VPS paths; dummy authorized health check and missing-settings failure pass. An actual PM2 start, config restart, save, kill and resurrect cycle retained all dummy settings and the env-file argument.
 - [ ] Run the one-time VPS adoption commands after deployment — requires the owner's terminal; current live process settings cannot be changed from this workspace.
 - [x] Verify local YouTube Without Ads through a fresh pasted link: real playback, captions off/on, 1.5x playback, theater/Escape, fullscreen, Reload restoring playback, and 320/390px control fit. All 63 tests and build pass.
-- [ ] Recheck deployed player after the owner publishes this update — the current live automated test intermittently stalls in YouTube's own player; local playback passed and no VidsIQ page/runtime error was observed.
+- [x] Recheck deployed player after the owner publishes this update — owner confirmed YouTube Without Ads works live on vidsiq.com; local playback and live playback both pass.
 - [ ] Node build target, direct YouTube/AI providers, env template, DEPLOY.md, verify
 - [ ] Push to GitHub so VPS deploy is a simple git pull + build + restart flow
 

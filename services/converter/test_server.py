@@ -30,6 +30,15 @@ class ConverterTests(unittest.TestCase):
             self.assertEqual(args[-1], 'https://www.youtube.com/watch?v=jNQXAC9IVRw')
             self.assertNotIn('--no-check-certificates', args)
 
+    def test_mp4_prefers_exact_progressive_stream_and_keeps_fallbacks(self):
+        data = ConversionRequest(video_id='jNQXAC9IVRw', mode='video', quality='720')
+        args = command(data, Path('/tmp/example'), self.settings)
+        selector = args[args.index('--format') + 1]
+        choices = selector.split('/')
+        self.assertEqual(choices[0], 'best[ext=mp4][vcodec^=avc1][acodec^=mp4a][height=720]')
+        self.assertEqual(choices[1], 'bestvideo[ext=mp4][vcodec^=avc1][height<=720]+bestaudio[ext=m4a]')
+        self.assertEqual(choices[2], 'best[ext=mp4][vcodec^=avc1][acodec^=mp4a][height<=720]')
+
     def test_queue_and_coalescing(self):
         event = threading.Event()
         def runner(data, folder, settings):

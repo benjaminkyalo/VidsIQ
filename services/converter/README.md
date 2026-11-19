@@ -86,9 +86,11 @@ is included. Do not claim live speed until these checks pass on your server.
 
 - Two active workers and sixteen waiting jobs by default. Duplicate requests
   for the same video/format/quality share work, including ready files.
-- MP3 encodes at the selected bitrate. MP4 selects H.264 and AAC up to the
-  requested height and merges without expensive video re-encoding. Source
-  quality limits output; a higher bitrate cannot restore lost audio detail.
+- MP3 encodes at the selected bitrate. MP4 first tries an exact-height H.264/AAC
+  progressive stream, avoiding a second audio download and merge when one exists.
+  Otherwise it keeps the original separate-stream and lower-resolution fallbacks,
+  merging without expensive video re-encoding. Source quality limits output; a
+  higher bitrate cannot restore lost audio detail.
 - FFprobe checks streams, codecs, duration and size before files become ready.
   The website also rejects incomplete transfers by byte count.
 - Defaults: one-hour video limit, 256 MiB completed file limit, four-minute
@@ -96,7 +98,8 @@ is included. Do not claim live speed until these checks pass on your server.
   Temporary-file reservations prevent unbounded queue/disk growth. Full queues
   return an explicit error instead of invented conversion progress.
 - Browser waits up to five minutes, showing queued/converting/downloading states.
-  Status checks are short requests; conversion never runs inside site handlers.
+  The first four status checks are 250 ms apart for short jobs, then settle to
+  one-second intervals to avoid extra load. Conversion never runs inside site handlers.
 - File delivery requires an authenticated configured origin and expiring ticket.
   Visitors never receive the service key or an arbitrary upstream URL.
 - Expired files are cleaned every minute. Temporary files and video IDs exist

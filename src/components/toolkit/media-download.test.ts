@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { fetchMedia } from './media-download';
+import { conversionPollDelay, fetchMedia } from './media-download';
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 it('retries an empty file and uses the successful provider filename', async () => {
@@ -22,17 +22,26 @@ it('stops an active stream at the 60-second deadline', async () => {
   await assertion;
   expect(get).toHaveBeenCalledTimes(1);
 });
-it('waits for a dedicated conversion and verifies delivered byte count', async () => {
+it('checks short conversions after 250ms and verifies delivered byte count', async () => {
   vi.useFakeTimers();
   const job='a'.repeat(32)+'.'+'b'.repeat(64);
   const get=vi.fn().mockResolvedValueOnce({dedicated:true,job,state:'queued'}).mockResolvedValueOnce({dedicated:true,job,state:'processing'}).mockResolvedValueOnce({dedicated:true,job,state:'ready',filename:'verified.mp4',size:2048});
   const fetch=vi.fn().mockResolvedValue(new Response(new Uint8Array(2048),{headers:{'content-type':'video/mp4'}}));
   vi.stubGlobal('fetch',fetch);
   const result=fetchMedia(get,'jNQXAC9IVRw','video','720',()=>{});
-  await vi.advanceTimersByTimeAsync(2000);
+  await vi.advanceTimersByTimeAsync(249);
+  expect(get).toHaveBeenCalledTimes(1);
+  await vi.advanceTimersByTimeAsync(1);
+  expect(get).toHaveBeenCalledTimes(2);
+  await vi.advanceTimersByTimeAsync(250);
   expect((await result).blob.size).toBe(2048);
   expect(fetch).toHaveBeenCalledWith(`/api/media?job=${job}`,expect.anything());
   expect(get).toHaveBeenCalledTimes(3);
+});
+it('returns to one-second status checks after the quick-start window',()=>{
+  expect([0,1,2,3].map(conversionPollDelay)).toEqual([250,250,250,250]);
+  expect(conversionPollDelay(4)).toBe(1000);
+  expect(conversionPollDelay(100)).toBe(1000);
 });
 it('rejects an incomplete dedicated file without a free-service retry', async () => {
   const get=vi.fn().mockResolvedValue({dedicated:true,job:'a'.repeat(32)+'.'+'b'.repeat(64),state:'ready',size:4096});

@@ -9,6 +9,8 @@ import { downloadText } from './result-controls';
 type GetMedia=ReturnType<typeof useServerFn<typeof getMediaDownload>>;
 type Quality='1080'|'720'|'480'|'360';
 type Bitrate='128'|'192'|'320';
+// Check short conversions quickly, then settle to one request per second under load.
+export function conversionPollDelay(check:number){return check<4?250:1000;}
 // Fetch through the same-origin proxy, retrying alternate instances when a file comes back empty.
 export async function fetchMedia(getMedia:GetMedia,id:string,mode:'audio'|'video',quality:Quality,onProgress:(p:number)=>void,bitrate:Bitrate='192',onStage?:(stage:string)=>void):Promise<{blob:Blob;filename:string}>{
  let deadline=AbortSignal.timeout(MEDIA_DEADLINE_MS);
@@ -17,9 +19,10 @@ export async function fetchMedia(getMedia:GetMedia,id:string,mode:'audio'|'video
  if(src.error)throw new Error(src.error);
  if(src.dedicated){
   deadline=AbortSignal.timeout(300_000);
+  let checks=0;
   while(src.state==='queued'||src.state==='processing'){
    onStage?.(src.state==='queued'?'Queued':'Converting');
-   await withinDeadline(new Promise(resolve=>setTimeout(resolve,1000)),deadline);
+   await withinDeadline(new Promise(resolve=>setTimeout(resolve,conversionPollDelay(checks++))),deadline);
    src=await withinDeadline(getMedia({data:{url,mode,quality,bitrate,job:src.job}}),deadline);
    if(src.error)throw new Error(src.error);
   }
@@ -42,7 +45,7 @@ export async function fetchMedia(getMedia:GetMedia,id:string,mode:'audio'|'video
    if(!/^(audio\/|video\/|application\/octet-stream)/i.test(type))throw new Error('The service did not return a media file.');
    const total=Number(r.headers.get('Estimated-Content-Length')??0);
    reader=r.body.getReader();const parts:BlobPart[]=[];let got=0;
-   for(;;){arm();const {done,value}=await withinDeadline(reader.read(),signal);if(done)break;parts.push(new Uint8Array(value).buffer);got+=value.length;onProgress(total?Math.min(99,Math.round(got/total*100)):-got);}
+   for(;;){arm();const {done,value}=await withinDeadline(reader.read(),signal);if(done)break;parts.push(value as Uint8Array<ArrayBuffer>);got+=value.length;onProgress(total?Math.min(99,Math.round(got/total*100)):-got);}
    if(src.dedicated&&src.size!==got)throw new Error('The file transfer was incomplete. Please retry.');
    if(got>1024)return {blob:new Blob(parts,{type}),filename:src.filename??(mode==='video'?'video.mp4':'audio.mp3')};
   }catch(error){if(deadline.aborted)throw new Error(src.dedicated?'The download took longer than 5 minutes. Please try again later.':'The download took longer than 60 seconds. Please try again later.');if(src.dedicated)throw error;}
