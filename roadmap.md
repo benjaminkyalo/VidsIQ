@@ -1,3 +1,6 @@
+# Channel video labels
+- [x] Rename the player section to “Popular songs/videos from [channel name]”, keep its source description accurate, and verify the live channel name renders on desktop and mobile.
+
 # VPS build reliability
 - [x] Fix `build:node` hanging after prerender lines: added a Node-only entry with the Fetch API export required by prerender, restored Nitro SSR registration, preserved normal PM2 listening, and added a self-hosted successful-build exit guard. Verified all 83 static pages and exit code 0 in 17 seconds; deployment guidance updated.
 

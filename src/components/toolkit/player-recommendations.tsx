@@ -16,8 +16,8 @@ export function PlayerRecommendations({ id, tool }: { id: string; tool: string }
   const channel = response?.records[0];
   const videos = channel?.recentUploads?.filter(video => video.id !== id) ?? [];
   const error = isError || response?.error || channel?.uploadsError;
-  return <section aria-label="More videos to watch here" className="border-t border-border pt-6 space-y-4">
-    <h3 className="text-xl font-semibold">More from {channel?.title || 'this channel'}</h3>
+  return <section aria-label="Popular songs and videos from this channel" className="border-t border-border pt-6 space-y-4">
+    <h3 className="text-xl font-semibold">Popular songs/videos from {channel?.title || 'this channel'}</h3>
     {isPending ? <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="animate-spin"/>Loading videos…</p> : error ? <div className="space-y-3"><p role="alert" className="text-sm text-muted-foreground">More videos are unavailable right now.</p><Button variant="outline" size="sm" disabled={isFetching} onClick={() => void refetch()}><RefreshCw/>Try again</Button></div> : videos.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">{videos.map(video => <Link key={video.id} to="/tools/$slug" params={{ slug: toolSlug(tool) }} search={{ url: `https://www.youtube.com/watch?v=${video.id}` }} className="min-w-0 group" aria-label={`Watch it Here!: ${video.title}`}>
       <SiteImage src={video.thumbnail} alt={video.title} width={480} height={270} className="w-full aspect-video object-cover rounded-md"/>
       <h4 className="text-sm font-semibold mt-3 group-hover:text-primary break-words">{video.title}</h4>

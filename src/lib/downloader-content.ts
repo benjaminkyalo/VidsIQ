@@ -99,7 +99,7 @@ const watch: DownloaderContent = {
     { h: 'Captions, speed & fullscreen', p: 'Turn on available subtitles, slow down lectures, speed up tutorials and watch fullscreen or in theater mode.' },
     { h: 'Works on any device', p: 'Android, iPhone, iPad, Windows, Mac, Chromebook and smart-TV browsers — in Chrome, Safari, Firefox, Edge or Opera.' },
     { h: 'No extension or app', p: 'Nothing to install, so it also works on school, office and shared computers where extensions are blocked.' },
-    { h: 'Keep watching here', p: 'Recent uploads from the same channel open in this player too, so you stay in a calm viewing space.' },
+    { h: 'Keep watching here', p: 'The Popular songs/videos section shows recent uploads from the same channel, and each one opens in this player too, so you stay in a calm viewing space.' },
   ],
   sections: [
     { h: 'Can you really watch YouTube without ads?', p: 'Honest answer: the only official way to remove YouTube ads everywhere is YouTube Premium. VidsIQ plays videos through YouTube’s own embedded player, so YouTube may still show an ad on some videos, and in-video sponsor segments are part of the video itself. What VidsIQ removes is everything else — comments, the busy homepage, autoplay feeds and on-page clutter — which is why many people find it a calmer way to watch.' },
