@@ -46,6 +46,6 @@ function Article() {
     {blogImages[p.image] && <SiteImage src={blogImages[p.image]} alt={p.title} width={1088} height={608} priority className="blog-cover" />}
     <p>{p.excerpt}</p>
     {p.sections.map(s => <section key={s.h}><h2>{s.h}</h2><p>{s.p}</p></section>)}
-    <Button asChild className="mt-6"><Link to="/tools/$slug" params={{ slug: toolSlug(p.tool) }}>Try the free {p.tool} <ArrowRight /></Link></Button>
+    <Button asChild className="mt-6 h-auto min-h-9 max-w-full whitespace-normal text-center"><Link to="/tools/$slug" params={{ slug: toolSlug(p.tool) }}>Try the free {p.tool} <ArrowRight /></Link></Button>
   </main></SiteShell>;
 }

@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as BlogsRouteImport } from './routes/blogs'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -21,6 +20,7 @@ import { Route as YoutubeSeoRouteImport } from './routes/youtube-seo'
 import { Route as ApiMediaRouteImport } from './routes/api.media'
 import { Route as ApiProfileImageRouteImport } from './routes/api.profile-image'
 import { Route as ApiThumbnailRouteImport } from './routes/api.thumbnail'
+import { Route as BlogsIndexRouteImport } from './routes/blogs.index'
 import { Route as BlogsSlugRouteImport } from './routes/blogs.$slug'
 import { Route as ToolsSlugRouteImport } from './routes/tools.$slug'
 
@@ -32,11 +32,6 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogsRoute = BlogsRouteImport.update({
-  id: '/blogs',
-  path: '/blogs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -84,10 +79,15 @@ const ApiThumbnailRoute = ApiThumbnailRouteImport.update({
   path: '/api/thumbnail',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogsIndexRoute = BlogsIndexRouteImport.update({
+  id: '/blogs/',
+  path: '/blogs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogsSlugRoute = BlogsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => BlogsRoute,
+  id: '/blogs/$slug',
+  path: '/blogs/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsSlugRoute = ToolsSlugRouteImport.update({
   id: '/tools/$slug',
@@ -98,7 +98,6 @@ const ToolsSlugRoute = ToolsSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blogs': typeof BlogsRouteWithChildren
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -110,11 +109,11 @@ export interface FileRoutesByFullPath {
   '/api/thumbnail': typeof ApiThumbnailRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/tools/$slug': typeof ToolsSlugRoute
+  '/blogs/': typeof BlogsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blogs': typeof BlogsRouteWithChildren
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -126,12 +125,12 @@ export interface FileRoutesByTo {
   '/api/thumbnail': typeof ApiThumbnailRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/tools/$slug': typeof ToolsSlugRoute
+  '/blogs': typeof BlogsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blogs': typeof BlogsRouteWithChildren
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -143,13 +142,13 @@ export interface FileRoutesById {
   '/api/thumbnail': typeof ApiThumbnailRoute
   '/blogs/$slug': typeof BlogsSlugRoute
   '/tools/$slug': typeof ToolsSlugRoute
+  '/blogs/': typeof BlogsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
-    | '/blogs'
     | '/contact'
     | '/privacy'
     | '/sitemap.xml'
@@ -161,11 +160,11 @@ export interface FileRouteTypes {
     | '/api/thumbnail'
     | '/blogs/$slug'
     | '/tools/$slug'
+    | '/blogs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/blogs'
     | '/contact'
     | '/privacy'
     | '/sitemap.xml'
@@ -177,11 +176,11 @@ export interface FileRouteTypes {
     | '/api/thumbnail'
     | '/blogs/$slug'
     | '/tools/$slug'
+    | '/blogs'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/blogs'
     | '/contact'
     | '/privacy'
     | '/sitemap.xml'
@@ -193,12 +192,12 @@ export interface FileRouteTypes {
     | '/api/thumbnail'
     | '/blogs/$slug'
     | '/tools/$slug'
+    | '/blogs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  BlogsRoute: typeof BlogsRouteWithChildren
   ContactRoute: typeof ContactRoute
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -208,7 +207,9 @@ export interface RootRouteChildren {
   ApiMediaRoute: typeof ApiMediaRoute
   ApiProfileImageRoute: typeof ApiProfileImageRoute
   ApiThumbnailRoute: typeof ApiThumbnailRoute
+  BlogsSlugRoute: typeof BlogsSlugRoute
   ToolsSlugRoute: typeof ToolsSlugRoute
+  BlogsIndexRoute: typeof BlogsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,13 +226,6 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blogs': {
-      id: '/blogs'
-      path: '/blogs'
-      fullPath: '/blogs'
-      preLoaderRoute: typeof BlogsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -297,12 +291,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiThumbnailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blogs/': {
+      id: '/blogs/'
+      path: '/blogs'
+      fullPath: '/blogs/'
+      preLoaderRoute: typeof BlogsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blogs/$slug': {
       id: '/blogs/$slug'
-      path: '/$slug'
+      path: '/blogs/$slug'
       fullPath: '/blogs/$slug'
       preLoaderRoute: typeof BlogsSlugRouteImport
-      parentRoute: typeof BlogsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/tools/$slug': {
       id: '/tools/$slug'
@@ -314,20 +315,9 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface BlogsRouteChildren {
-  BlogsSlugRoute: typeof BlogsSlugRoute
-}
-
-const BlogsRouteChildren: BlogsRouteChildren = {
-  BlogsSlugRoute: BlogsSlugRoute,
-}
-
-const BlogsRouteWithChildren = BlogsRoute._addFileChildren(BlogsRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  BlogsRoute: BlogsRouteWithChildren,
   ContactRoute: ContactRoute,
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -337,7 +327,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMediaRoute: ApiMediaRoute,
   ApiProfileImageRoute: ApiProfileImageRoute,
   ApiThumbnailRoute: ApiThumbnailRoute,
+  BlogsSlugRoute: BlogsSlugRoute,
   ToolsSlugRoute: ToolsSlugRoute,
+  BlogsIndexRoute: BlogsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

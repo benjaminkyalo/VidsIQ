@@ -85,4 +85,4 @@ export const toolSlug = (name: string) => name.toLowerCase().replace(/[–—]/g
 export const findToolBySlug = (slug: string) => allTools.find(t => toolSlug(t.name) === slug);
 
 /** Priority tools promoted sitewide (homepage strip, footer) for search visibility. */
-export const priorityTools = ['Monetization Checker','YouTube to MP3','YouTube to MP4','YouTube Without Ads'] as const;
+export const priorityTools = ['Monetization Checker','Transcript Generator','Thumbnail Downloader','YouTube Without Ads'] as const;

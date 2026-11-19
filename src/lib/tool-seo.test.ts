@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { allTools, findToolBySlug, toolSlug } from './tools';
-import { toolSearchIdentity } from './tool-seo';
+import { searchOverrides, toolSearchIdentity } from './tool-seo';
 
 describe('individual search destinations', () => {
   it('assigns every catalog tool its own self-referencing destination', () => {
@@ -17,5 +17,18 @@ describe('individual search destinations', () => {
     expect(tool).toBeDefined();
     if (!tool) throw new Error('MP3 Downloader missing');
     expect(toolSearchIdentity(tool).path).toBe('/tools/mp3-downloader');
+  });
+  it('targets searched phrases on priority tool titles', () => {
+    const title = (slug: string) => toolSearchIdentity(findToolBySlug(slug)!).title;
+    expect(title('monetization-checker')).toContain('YouTube Monetization Checker');
+    expect(title('youtube-without-ads')).toContain('Watch YouTube Without Ads');
+    expect(title('transcript-generator')).toContain('YouTube Transcript Generator');
+    expect(title('thumbnail-downloader')).toContain('YouTube Thumbnail Downloader');
+  });
+  it('keeps every override title and description within search snippet limits', () => {
+    for (const { title, description } of Object.values(searchOverrides)) {
+      expect(title.length).toBeLessThanOrEqual(70);
+      expect(description.length).toBeLessThanOrEqual(170);
+    }
   });
 });
