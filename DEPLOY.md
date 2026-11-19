@@ -96,9 +96,10 @@ cd /var/www/vidsiq-app
 bun run build:node
 ```
 
-This produces `.output/` — a self-contained Node server.
-It takes a few minutes. A prerender warning about `server.fetch` is harmless:
-pages are rendered live by the server instead of being frozen to disk.
+This produces `.output/` — a self-contained Node server with all public pages
+prerendered. A successful build prints `Prerendered 83 pages`, then
+`Prerender complete; closing preview handles.` and returns to the shell. Do not
+restart PM2 if the build reports an error or does not exit.
 
 ---
 

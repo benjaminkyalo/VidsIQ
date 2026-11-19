@@ -7,9 +7,28 @@
 // the build fails. Never add compression (compressPublicAssets, vite-plugin-compression):
 // hosting already compresses at the edge.
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
+import { fileURLToPath } from "node:url";
+import type { Plugin } from "vite";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { allTools, toolSlug } from "./src/lib/tools";
 import { blogPosts } from "./src/lib/blog-posts";
+
+// Self-hosted builds do not run in the sandbox, so the shared config's exit
+// watchdog is absent. Close successful prerender builds after all post hooks.
+const nodePrerenderExit: Plugin = {
+  name: "vidsiq-node-prerender-exit",
+  apply: "build",
+  enforce: "post",
+  buildApp: {
+    order: "post",
+    async handler() {
+      setTimeout(() => {
+        console.log("[build:node] Prerender complete; closing preview handles.");
+        process.exit(Number(process.exitCode ?? 0));
+      }, 5000).unref();
+    },
+  },
+};
 
 export default defineConfig({
   tanstackStart: {
@@ -26,5 +45,11 @@ export default defineConfig({
   },
   // `bun run build:node` (BUILD_TARGET=node) produces a plain Node server for VPS
   // hosting in dist/; the default build keeps the hosting platform target.
-  ...(process.env["BUILD_TARGET"] === "node" ? { nitro: { preset: "node-server" } } : {}),
+  ...(process.env["BUILD_TARGET"] === "node" ? {
+    vite: { plugins: [nodePrerenderExit] },
+    nitro: {
+      preset: "node-server",
+      ...{ entry: fileURLToPath(new URL("./src/node-server-entry.ts", import.meta.url)) },
+    },
+  } : {}),
 });

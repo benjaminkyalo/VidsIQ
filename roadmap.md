@@ -1,3 +1,6 @@
+# VPS build reliability
+- [x] Fix `build:node` hanging after prerender lines: added a Node-only entry with the Fetch API export required by prerender, restored Nitro SSR registration, preserved normal PM2 listening, and added a self-hosted successful-build exit guard. Verified all 83 static pages and exit code 0 in 17 seconds; deployment guidance updated.
+
 # Thumbnail Downloader content
 - [x] Apply only the supplied YouTube Thumbnail Downloader text, FAQs, and search metadata without changing the existing page design or working preview/download flow; verify responsive layout, links, and tests. Sixteen FAQs render in initial HTML, a real 480 × 360 preview downloaded as a valid 15.9 KB JPG, mobile has no overflow, and 13 focused tests pass.
 
