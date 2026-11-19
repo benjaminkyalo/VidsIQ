@@ -14,7 +14,7 @@ the website's resources. These starting allocations are not a capacity guarantee
 From your updated repository checkout:
 
 ```bash
-cd /var/www/vidsiq/services/converter
+cd /var/www/vidsiq-app/services/converter
 umask 077
 python3 - <<'PY'
 from pathlib import Path
@@ -43,17 +43,19 @@ or a `VITE_` variable. Store private environment files outside your checkout
 (for example `/etc/vidsiq.env`) and keep mode 600. The platform manages the
 repository ignore rules; do not rely on a private file being ignored.
 
-Rebuild the website using `DEPLOY.md`, then restart PM2. Its Node entry does
-not automatically load `.env.production`; preserve your working environment
-loader, or launch Node explicitly with your private file:
+Rebuild the website using `DEPLOY.md`. The committed PM2 configuration always
+loads `/etc/vidsiq.env`; verify settings without printing them, then restart:
 
 ```bash
-cd /var/www/vidsiq
-# Only after a successful build; restarting briefly interrupts the website.
-pm2 delete vidsiq
-pm2 start node --name vidsiq -- --env-file=/etc/vidsiq.env /var/www/vidsiq/.output/server/index.mjs
+cd /var/www/vidsiq-app
+node --env-file=/etc/vidsiq.env scripts/verify-vps.mjs
+pm2 restart ecosystem.config.cjs --update-env
 pm2 save
+sudo systemctl enable docker
 ```
+
+Run `pm2 startup` once and execute its printed system command. Together with
+Compose's `restart: unless-stopped`, this preserves both services across reboots.
 
 The service listens on loopback only. **Do not open port 8090 publicly.**
 The hosted preview cannot reach a loopback service on your VPS; test on the
@@ -63,7 +65,7 @@ server-only credential, not an unauthenticated public converter.
 ## Verify without printing credentials
 
 ```bash
-cd /var/www/vidsiq/services/converter
+cd /var/www/vidsiq-app/services/converter
 docker compose exec -T converter python - <<'PY'
 import os, urllib.request
 req = urllib.request.Request('http://127.0.0.1:8090/health', headers={'Authorization': 'Bearer ' + os.environ['CONVERTER_API_KEY']})

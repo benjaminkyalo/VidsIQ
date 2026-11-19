@@ -79,6 +79,10 @@
 - [x] Verify the screenshot’s real video: privacy public, duration 1:35:04, blocked BY/RU; copy/export, missing-video guidance, country selection, and real Video Viewer export pass. All 69 pages return 200 with ten FAQs, phone overflow absent, 39 tests pass, latest build OK. YouTube requires bot-verification sign-in in the test browser, so embedded playback itself is not verified. Other tools retain existing workflows; this first pass does not establish screenshot parity for tools not pictured.
 
 # VPS hosting
+- [x] Add permanent PM2 startup loading `/etc/vidsiq.env`, converter health/settings verification without secret output, boot persistence instructions, and current VPS paths; dummy authorized health check and missing-settings failure pass. An actual PM2 start, config restart, save, kill and resurrect cycle retained all dummy settings and the env-file argument.
+- [ ] Run the one-time VPS adoption commands after deployment — requires the owner's terminal; current live process settings cannot be changed from this workspace.
+- [x] Verify local YouTube Without Ads through a fresh pasted link: real playback, captions off/on, 1.5x playback, theater/Escape, fullscreen, Reload restoring playback, and 320/390px control fit. All 63 tests and build pass.
+- [ ] Recheck deployed player after the owner publishes this update — the current live automated test intermittently stalls in YouTube's own player; local playback passed and no VidsIQ page/runtime error was observed.
 - [ ] Node build target, direct YouTube/AI providers, env template, DEPLOY.md, verify
 - [ ] Push to GitHub so VPS deploy is a simple git pull + build + restart flow
 

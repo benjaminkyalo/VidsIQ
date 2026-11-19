@@ -39,8 +39,8 @@ bun -v     # 1.x
 ```bash
 sudo mkdir -p /var/www && sudo chown $USER /var/www
 cd /var/www
-git clone -b lovable-site https://github.com/benjaminkyalo/youtubedownloadpro.git vidsiq
-cd vidsiq
+git clone -b lovable-site https://github.com/benjaminkyalo/VidsIQ.git vidsiq-app
+cd vidsiq-app
 bun install
 ```
 
@@ -48,35 +48,35 @@ bun install
 
 ## 2. Set the environment variables
 
-Create the secrets file:
+Keep every private website setting in one file outside the repository. PM2's
+saved configuration always loads this exact file, including after a reboot:
 
 ```bash
-nano /var/www/vidsiq/.env.production
+sudo touch /etc/vidsiq.env
+sudo chmod 600 /etc/vidsiq.env
+sudo nano /etc/vidsiq.env
 ```
 
-Paste this and fill in the two keys you own:
+Paste this and fill in the keys you own:
 
-```bash
-# --- required: YouTube data (all the checker / lookup tools) ---
-# Google Cloud Console -> APIs & Services -> Credentials -> your "VidsIQ" API key
+```dotenv
+# Required: YouTube checker and lookup tools
 GOOGLE_API_KEY=paste-your-google-key-here
 
-# --- required: AI writing (title / tag / description generators, summarizer, SEO rewrite) ---
-# Any OpenAI-compatible provider works.
+# Required: dedicated MP3, MP4 and Shorts downloads
+CONVERSION_SERVICE_URL=http://127.0.0.1:8090
+CONVERTER_API_KEY=paste-the-same-key-from-vidsiq-converter-env-here
+
+# Optional: AI writing tools
 AI_API_KEY=paste-your-ai-key-here
 AI_MODEL=gpt-5.1
-# AI_BASE_URL=https://api.openai.com/v1   # uncomment only if you use a different provider
+# AI_BASE_URL=https://api.openai.com/v1
 
-# --- already committed, no need to change ---
-SUPABASE_URL=https://kileqgforewkricvbzpp.supabase.co
-SUPABASE_PUBLISHABLE_KEY=sb_publishable_27yH1_lvX1Mn7Yr6hjsGbQ_qZDu6Usc
+PORT=3000
 ```
 
-Lock it down so other users on the server can't read it:
-
-```bash
-chmod 600 /var/www/vidsiq/.env.production
-```
+Never commit this file or print its contents. The committed
+`ecosystem.config.cjs` contains only the file path, not any credentials.
 
 Notes:
 - `GOOGLE_API_KEY` is free from Google Cloud Console (YouTube Data API v3).
@@ -92,7 +92,7 @@ Notes:
 ## 3. Build
 
 ```bash
-cd /var/www/vidsiq
+cd /var/www/vidsiq-app
 bun run build:node
 ```
 
@@ -102,15 +102,19 @@ pages are rendered live by the server instead of being frozen to disk.
 
 ---
 
-## 4. Run it with pm2 (keeps it up after reboots)
+## 4. Run it with pm2 (keeps settings and uptime after reboots)
 
 ```bash
 sudo npm install -g pm2
-cd /var/www/vidsiq
-PORT=3000 pm2 start .output/server/index.mjs --name vidsiq
+cd /var/www/vidsiq-app
+node --env-file=/etc/vidsiq.env scripts/verify-vps.mjs
+pm2 start ecosystem.config.cjs
 pm2 save
 pm2 startup     # then run the command it prints
 ```
+
+The verification command checks setting names and converter health without
+printing credentials. Do not start the website if it reports a failure.
 
 Test it locally on the server:
 
@@ -187,14 +191,38 @@ menu, and working tool results.
 ## Updating later
 
 ```bash
-cd /var/www/vidsiq
+cd /var/www/vidsiq-app
 git pull
 bun install
 bun run build:node
-pm2 restart vidsiq
+node --env-file=/etc/vidsiq.env scripts/verify-vps.mjs
+pm2 restart ecosystem.config.cjs --update-env
+pm2 save
 ```
 
-That's the whole update cycle — four lines.
+The private settings stay in `/etc/vidsiq.env`; pulling code never replaces them.
+
+### One-time move for an existing working VPS
+
+If the current working settings are in `.env.production`, preserve them in the
+permanent location, then adopt the saved startup configuration:
+
+```bash
+cd /var/www/vidsiq-app
+sudo cp .env.production /etc/vidsiq.env
+sudo chmod 600 /etc/vidsiq.env
+node --env-file=/etc/vidsiq.env scripts/verify-vps.mjs
+pm2 delete vidsiq
+pm2 start ecosystem.config.cjs
+pm2 save
+pm2 startup     # run the printed system command once if not done before
+sudo systemctl enable docker
+cd services/converter && docker compose up -d
+```
+
+This briefly restarts the website. Do not delete the old private file until the
+verification command and a real download both pass. Future updates only need
+the normal update cycle above.
 
 ---
 
@@ -207,7 +235,7 @@ isolated workers, private credentials, file validation and live acceptance check
 | Symptom | Cause / fix |
 | --- | --- |
 | Old site still shows | Browser cache. Hard refresh, or `pm2 restart vidsiq`. |
-| Tools say "The YouTube connection is not configured." | `GOOGLE_API_KEY` missing or wrong. Check `.env.production`, rebuild not needed — restart: `pm2 restart vidsiq`. |
+| Tools say "The YouTube connection is not configured." | `GOOGLE_API_KEY` missing or wrong in `/etc/vidsiq.env`. Run the verification command, then restart with `pm2 restart ecosystem.config.cjs --update-env`. |
 | AI tools say "AI writing is not configured." | `AI_API_KEY` missing. |
 | AI tools error with a model name | `AI_MODEL` isn't available to your key. Change it. |
 | 502 from nginx | The Node server isn't up. `pm2 logs vidsiq`. |
@@ -220,5 +248,5 @@ isolated workers, private credentials, file validation and live acceptance check
 
 `.env` is committed in this repo and only holds Supabase's **publishable**
 keys — those are designed to be public, so this is not an emergency. Keep your
-`GOOGLE_API_KEY` and `AI_API_KEY` in `.env.production` (not committed), and
-restrict the Google key to the YouTube Data API v3 only.
+`GOOGLE_API_KEY`, `CONVERTER_API_KEY` and `AI_API_KEY` in `/etc/vidsiq.env`
+(not committed), and restrict the Google key to the YouTube Data API v3 only.
