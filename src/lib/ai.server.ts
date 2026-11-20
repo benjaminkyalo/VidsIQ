@@ -1,6 +1,7 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { aiFailureMessage, retryableAiStatus } from './ai-failure';
+import { serverSetting } from './server-env';
 
 const RUN_ID = 'X-Lovable-AIG-Run-ID';
 function runIdFetch() {
@@ -24,18 +25,18 @@ type Provider = { provider: ReturnType<typeof createOpenAI>; model: string; gate
 
 // Self-hosted installs have no Lovable key, so a direct OpenAI-compatible endpoint wins when configured.
 function resolveProvider(): Provider {
-  const directKey = process.env['AI_API_KEY'] || process.env['OPENAI_API_KEY'];
+  const directKey = serverSetting('AI_API_KEY', 'OPENAI_API_KEY');
   if (directKey) {
     return {
       provider: createOpenAI({
-        baseURL: process.env['AI_BASE_URL'] || 'https://api.openai.com/v1',
+        baseURL: serverSetting('AI_BASE_URL') || 'https://api.openai.com/v1',
         apiKey: directKey,
       }),
-      model: process.env['AI_MODEL'] || DIRECT_MODEL,
+      model: serverSetting('AI_MODEL') || DIRECT_MODEL,
       gateway: false,
     };
   }
-  const apiKey = process.env['LOVABLE_API_KEY'];
+  const apiKey = serverSetting('LOVABLE_API_KEY');
   if (!apiKey) throw new AiError('AI writing is not configured.', 401);
   return {
     provider: createOpenAI({
