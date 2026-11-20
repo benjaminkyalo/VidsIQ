@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { serverSetting } from './server-env';
 // Apify "YouTube Video Downloader" actor (marielise.dev). Runs async; the client polls the run id.
 const GATEWAY = 'https://connector-gateway.lovable.dev/apify';
 const DIRECT_BASE = 'https://api.apify.com/v2';
@@ -9,15 +10,13 @@ const item = z.object({ status: z.string().optional(), title: z.string().optiona
 
 // On self-hosted servers the connector gateway is unavailable, so a personal
 // Apify token may be supplied directly; it is read only inside server handlers.
-// Tolerate pasted values wrapped in quotes or carrying stray spaces/line endings.
-const cleanToken = (v: string | undefined) => (v ?? '').trim().replace(/^['"]|['"]$/g, '').trim();
-export function apifyDirectToken() { return cleanToken(process.env['APIFY_DIRECT_TOKEN']) || cleanToken(process.env['APIFY_TOKEN']); }
-export function apifyConfigured() { return Boolean(apifyDirectToken() || (process.env['APIFY_API_KEY'] && process.env['LOVABLE_API_KEY'])); }
+export function apifyDirectToken() { return serverSetting('APIFY_DIRECT_TOKEN', 'APIFY_TOKEN'); }
+export function apifyConfigured() { return Boolean(apifyDirectToken() || (serverSetting('APIFY_API_KEY') && serverSetting('LOVABLE_API_KEY'))); }
 async function call(path: string, init: RequestInit = {}) {
   const direct = apifyDirectToken();
   const headers = direct
     ? { Authorization: `Bearer ${direct}`, 'Content-Type': 'application/json' }
-    : { Authorization: `Bearer ${process.env['LOVABLE_API_KEY'] ?? ''}`, 'X-Connection-Api-Key': process.env['APIFY_API_KEY'] ?? '', 'Content-Type': 'application/json' };
+    : { Authorization: `Bearer ${serverSetting('LOVABLE_API_KEY')}`, 'X-Connection-Api-Key': serverSetting('APIFY_API_KEY'), 'Content-Type': 'application/json' };
   const r = await fetch(`${direct ? DIRECT_BASE : GATEWAY}${path}`, { ...init, headers, signal: AbortSignal.timeout(15_000) });
   if (!r.ok) { console.error(`Apify request failed [${r.status}]: ${await r.text()}`); throw new Error(r.status === 402 ? 'The download plan has run out. Please try again later.' : 'The download service is unavailable right now. Please try again later.'); }
   return r.json() as Promise<{ data?: unknown } & Record<string, unknown>>;
