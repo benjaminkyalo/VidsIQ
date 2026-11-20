@@ -63,7 +63,12 @@ Paste this and fill in the keys you own:
 # Required: YouTube checker and lookup tools
 GOOGLE_API_KEY=paste-your-google-key-here
 
-# Required: dedicated MP3, MP4 and Shorts downloads
+# Required: MP3, MP4 and Shorts downloads. Apify is used first when this token
+# is set. Get it in the Apify console: your name (top left) > Settings >
+# API & Integrations > Personal API tokens > Create a new token.
+APIFY_DIRECT_TOKEN=paste-your-apify-personal-token-here
+
+# Optional: your own conversion worker, used only when the Apify token is absent
 CONVERSION_SERVICE_URL=http://127.0.0.1:8090
 CONVERTER_API_KEY=paste-the-same-key-from-vidsiq-converter-env-here
 
@@ -237,6 +242,7 @@ isolated workers, private credentials, file validation and live acceptance check
 | --- | --- |
 | Old site still shows | Browser cache. Hard refresh, or `pm2 restart vidsiq`. |
 | Tools say "The YouTube connection is not configured." | `GOOGLE_API_KEY` missing or wrong in `/etc/vidsiq.env`. Run the verification command, then restart with `pm2 restart ecosystem.config.cjs --update-env`. |
+| Downloads say "The download service is unavailable right now." | `APIFY_DIRECT_TOKEN` missing or wrong in `/etc/vidsiq.env`, or your Apify credit has run out. Run the verification command, then restart with `pm2 restart ecosystem.config.cjs --update-env`. |
 | AI tools say "AI writing is not configured." | `AI_API_KEY` missing. |
 | AI tools error with a model name | `AI_MODEL` isn't available to your key. Change it. |
 | 502 from nginx | The Node server isn't up. `pm2 logs vidsiq`. |
@@ -249,5 +255,5 @@ isolated workers, private credentials, file validation and live acceptance check
 
 `.env` is committed in this repo and only holds Supabase's **publishable**
 keys — those are designed to be public, so this is not an emergency. Keep your
-`GOOGLE_API_KEY`, `CONVERTER_API_KEY` and `AI_API_KEY` in `/etc/vidsiq.env`
+`GOOGLE_API_KEY`, `APIFY_DIRECT_TOKEN`, `CONVERTER_API_KEY` and `AI_API_KEY` in `/etc/vidsiq.env`
 (not committed), and restrict the Google key to the YouTube Data API v3 only.

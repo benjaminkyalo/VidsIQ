@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { CheckCircle2, Download, Loader2, Music, Plus, RotateCcw, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ export async function fetchMedia(getMedia:GetMedia,id:string,mode:'audio'|'video
    const total=Number(r.headers.get('Estimated-Content-Length')??0);
    reader=r.body.getReader();const parts:BlobPart[]=[];let got=0;
    for(;;){arm();const {done,value}=await withinDeadline(reader.read(),signal);if(done)break;parts.push(value as Uint8Array<ArrayBuffer>);got+=value.length;onProgress(total?Math.min(99,Math.round(got/total*100)):-got);}
-   if(src.dedicated&&src.size!==got)throw new Error('The file transfer was incomplete. Please retry.');
+   if(src.dedicated&&src.size&&src.size!==got)throw new Error('The file transfer was incomplete. Please retry.');
    if(got>1024)return {blob:new Blob(parts,{type}),filename:src.filename??(mode==='video'?'video.mp4':'audio.mp3')};
   }catch(error){if(deadline.aborted)throw new Error(src.dedicated?'The download took longer than 5 minutes. Please try again later.':'The download took longer than 60 seconds. Please try again later.');if(src.dedicated)throw error;}
   finally{clearTimeout(stall);void reader?.cancel().catch(()=>{});ctl.abort();}
@@ -56,22 +56,41 @@ export async function fetchMedia(getMedia:GetMedia,id:string,mode:'audio'|'video
 function saveBlob(blob:Blob,name:string){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);}
 const progressLabel=(p:number)=>p>0?`${p}%`:p<0?`${(-p/1048576).toFixed(1)} MB`:'Preparing…';
 const VIDEO_TOOLS=['Video Downloader','YouTube URL Downloader','YouTube Shorts Downloader','YouTube to MP4'];
-export function MediaDownload({tool,id}:{tool:string;id:string|null}) {
+const durationLabel=(iso?:string)=>{const m=/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso??'');if(!m)return '';const [h,mi,s]=[m[1],m[2],m[3]].map(v=>Number(v??0));return `${h?`${h}:${String(mi).padStart(2,'0')}`:mi}:${String(s).padStart(2,'0')}`;};
+// Guided flow: confirm video → pick quality → real conversion status → preview → save.
+export function MediaDownload({tool,id,record}:{tool:string;id:string|null;record?:PublicRecord|undefined}) {
  const getMedia=useServerFn(getMediaDownload);
  const [mode,setMode]=useState<'audio'|'video'>(VIDEO_TOOLS.includes(tool)?'video':'audio');
  const [quality,setQuality]=useState<Quality>('720');const [bitrate,setBitrate]=useState<Bitrate>('192');
- const [busy,setBusy]=useState(false);const [err,setErr]=useState('');const [done,setDone]=useState<{blob:Blob;filename:string}|null>(null);const [progress,setProgress]=useState(0);const [stage,setStage]=useState('Preparing');
+ const [step,setStep]=useState<'confirm'|'choose'|'busy'|'ready'>('confirm');
+ const [err,setErr]=useState('');const [done,setDone]=useState<{blob:Blob;filename:string;url:string}|null>(null);const [progress,setProgress]=useState(0);const [stage,setStage]=useState('Preparing');
+ useEffect(()=>()=>{if(done)URL.revokeObjectURL(done.url);},[done]);
+ useEffect(()=>{setStep('confirm');setDone(null);setErr('');},[id]);
  if(!id)return <p className="text-primary">Enter a valid video URL or video ID.</p>;
- const options:{v:string;label:string;hint:string}[]=mode==='audio'?[{v:'128',label:'128 kbps',hint:'Smaller file'},{v:'192',label:'192 kbps',hint:'Best pick'},{v:'320',label:'320 kbps',hint:'Best sound'}]:[{v:'1080',label:'1080p',hint:'Full HD'},{v:'720',label:'720p',hint:'Best pick'},{v:'480',label:'480p',hint:'Saves data'},{v:'360',label:'360p',hint:'Smallest'}];
- const selected=mode==='audio'?bitrate:quality;
- const pick=(v:string)=>{setDone(null);setErr('');if(mode==='audio')setBitrate(v as Bitrate);else setQuality(v as Quality);};
- const start=async()=>{setBusy(true);setErr('');setDone(null);setProgress(0);setStage('Preparing');try{const f=await fetchMedia(getMedia,id,mode,quality,setProgress,bitrate,setStage);saveBlob(f.blob,f.filename);setDone(f);}catch(e){setErr(e instanceof Error?e.message:'The download service is unavailable right now. Please try again later.');}finally{setBusy(false);}};
+ const busy=step==='busy';
+ const options:{v:string;label:string;hint:string}[]=mode==='audio'?[{v:'320',label:'320 kbps',hint:'Up to best sound'},{v:'192',label:'192 kbps',hint:'Best pick'},{v:'128',label:'128 kbps',hint:'Smaller file'}]:[{v:'1080',label:'1080p',hint:'Full HD'},{v:'720',label:'720p',hint:'Best pick'},{v:'480',label:'480p',hint:'Saves data'},{v:'360',label:'360p',hint:'Smallest'}];
+ const selected=mode==='audio'?bitrate:quality;const qLabel=mode==='audio'?`${bitrate} kbps`:`${quality}p`;
+ const pick=(v:string)=>{setErr('');if(mode==='audio')setBitrate(v as Bitrate);else setQuality(v as Quality);};
+ const start=async()=>{setStep('busy');setErr('');setDone(null);setProgress(0);setStage('Preparing');try{const f=await fetchMedia(getMedia,id,mode,quality,setProgress,bitrate,setStage);setDone({...f,url:URL.createObjectURL(f.blob)});setStep('ready');}catch(e){setErr(e instanceof Error?e.message:'The download service is unavailable right now. Please try again later.');setStep('choose');}};
+ const thumb=record?.thumbnail||`https://i.ytimg.com/vi/${id}/hqdefault.jpg`;const dur=durationLabel(record?.duration);
+ const steps=['Confirm video','Choose quality','Convert','Download'];const at={confirm:0,choose:1,busy:2,ready:3}[step];
  return <div className="dl-panel">
-  <div className="dl-switch" role="tablist" aria-label="File type">{(['audio','video'] as const).map(m=><button key={m} type="button" role="tab" aria-selected={mode===m} disabled={busy} className={mode===m?'is-on':''} onClick={()=>{setMode(m);setDone(null);setErr('');}}>{m==='audio'?<Music/>:<Video/>}{m==='audio'?'MP3 audio':'MP4 video'}</button>)}</div>
-  <div className="dl-options" role="radiogroup" aria-label={mode==='audio'?'Audio quality':'Video quality'}>{options.map(o=><button key={o.v} type="button" role="radio" aria-checked={selected===o.v} disabled={busy} className={selected===o.v?'is-on':''} onClick={()=>pick(o.v)}><strong>{o.label}</strong><span>{o.hint}</span></button>)}</div>
-  <Button size="lg" className="dl-go" disabled={busy} onClick={()=>void start()}>{busy?<Loader2 className="animate-spin"/>:<Download/>}{busy?`${stage}… ${progress?progressLabel(progress):''}`:`Convert & download ${mode==='audio'?'MP3':'MP4'}`}</Button>
-  {busy&&<div className="dl-bar" aria-hidden="true"><span style={{width:progress>0?`${progress}%`:'35%'}} className={progress>0?'':'is-indeterminate'}/></div>}
-  {done&&<div className="dl-done"><CheckCircle2/><div className="min-w-0"><strong className="block break-words">{done.filename}</strong><span>{(done.blob.size/1048576).toFixed(1)} MB saved to your device</span></div><Button variant="outline" size="sm" onClick={()=>saveBlob(done.blob,done.filename)}><Download/>Save again</Button></div>}
+  <ol className="dl-steps" aria-label="Download steps">{steps.map((s,i)=><li key={s} className={i<=at?'is-on':''}><span>{i+1}</span>{s}</li>)}</ol>
+  <div className="dl-video"><SiteImage src={thumb} alt="" width={160} height={90} className="dl-thumb"/><div className="min-w-0"><strong className="block break-words">{record?.title??'YouTube video'}</strong>{record?.channelTitle&&<span className="block text-sm text-muted-foreground">{record.channelTitle}</span>}{dur&&<span className="block text-sm text-muted-foreground">Length {dur}</span>}</div></div>
+  {step==='confirm'&&<div className="grid gap-3"><p className="text-sm text-muted-foreground">Is this the right video?</p><Button size="lg" className="dl-go" onClick={()=>setStep('choose')}><CheckCircle2/>Yes, continue</Button></div>}
+  {step==='choose'&&<>
+   <div className="dl-switch" role="tablist" aria-label="File type">{(['audio','video'] as const).map(m=><button key={m} type="button" role="tab" aria-selected={mode===m} className={mode===m?'is-on':''} onClick={()=>{setMode(m);setErr('');}}>{m==='audio'?<Music/>:<Video/>}{m==='audio'?'MP3 audio':'MP4 video'}</button>)}</div>
+   <div className="dl-options" role="radiogroup" aria-label={mode==='audio'?'Audio quality':'Video quality'}>{options.map(o=><button key={o.v} type="button" role="radio" aria-checked={selected===o.v} className={selected===o.v?'is-on':''} onClick={()=>pick(o.v)}><strong>{o.label}</strong><span>{o.hint}</span></button>)}</div>
+   <Button size="lg" className="dl-go" onClick={()=>void start()}><Download/>Convert to {mode==='audio'?'MP3':'MP4'}</Button>
+   {mode==='audio'&&<p className="text-xs text-muted-foreground">Sound quality can’t exceed the original upload.</p>}
+  </>}
+  {busy&&<div className="dl-working" role="status"><Loader2 className="animate-spin"/><strong>{stage}…</strong><span>{mode==='audio'?'MP3':'MP4'} · {qLabel}{progress?` · ${progressLabel(progress)}`:''}</span><div className="dl-bar" aria-hidden="true"><span style={{width:progress>0?`${progress}%`:'35%'}} className={progress>0?'':'is-indeterminate'}/></div></div>}
+  {step==='ready'&&done&&<div className="dl-ready">
+   <div className="dl-done"><CheckCircle2/><div className="min-w-0"><strong className="block">{mode==='audio'?'Audio':'Video'} ready</strong><span className="break-words">{done.filename} · {(done.blob.size/1048576).toFixed(1)} MB</span></div></div>
+   {mode==='audio'?<audio controls src={done.url} className="w-full"/>:<video controls src={done.url} className="dl-preview"/>}
+   <Button size="lg" className="dl-save" onClick={()=>saveBlob(done.blob,done.filename)}><Download/>Download now</Button>
+   <Button variant="outline" onClick={()=>setStep('choose')}><RotateCcw/>Convert in another quality</Button>
+  </div>}
   {err&&<div role="alert" className="dl-error"><p>{err}</p><Button variant="outline" size="sm" onClick={()=>void start()}><RotateCcw/>Try again</Button></div>}
   <ul className="dl-facts"><li>Free, no sign-up</li><li>No pop-ups or redirects</li><li>Works on phone, tablet and computer</li></ul>
  </div>;

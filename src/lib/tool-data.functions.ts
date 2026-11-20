@@ -90,13 +90,18 @@ export const getToolData = createServerFn({ method:'POST' }).inputValidator((dat
   return {...empty,records:channel.items.map(record)};
  } catch(e) { return {...empty,error:e instanceof Error ? e.message : 'The tool request could not complete. Please try again.'}; }
 });
-const downloadSchema = z.object({ url: z.string().trim().min(1).max(2000), mode: z.enum(['audio','video']), quality: z.enum(['1080','720','480','360']).default('720'), bitrate: z.enum(['128','192','320']).default('192'), attempt: z.number().int().min(0).max(5).default(0), job: z.string().regex(/^[a-f0-9]{32}\.[a-f0-9]{64}$/).optional() });
+const downloadSchema = z.object({ url: z.string().trim().min(1).max(2000), mode: z.enum(['audio','video']), quality: z.enum(['1080','720','480','360']).default('720'), bitrate: z.enum(['128','192','320']).default('192'), attempt: z.number().int().min(0).max(5).default(0), job: z.string().regex(/^([a-f0-9]{32}\.[a-f0-9]{64}|apify:[A-Za-z0-9]{10,24})$/).optional() });
 const COBALT_INSTANCES=['https://co.otomir23.me/','https://api.cobalt.liubquanti.click/'];
 export type MediaDownloadResponse = { next?: number | undefined; url?: string | undefined; filename?: string | undefined; error?: string | undefined; job?: string | undefined; state?: 'queued'|'processing'|'ready'|'error' | undefined; size?: number | undefined; dedicated?: boolean | undefined };
 export const getMediaDownload = createServerFn({ method:'POST' }).inputValidator((d:unknown) => downloadSchema.parse(d)).handler(async ({data}):Promise<MediaDownloadResponse> => {
  try {
   const parsed=parseYouTubeInput(data.url);
   if(parsed.kind!=='video') return {error:'Enter a video link or video ID.'};
+  const apify=await import('./apify-service');
+  if(data.job?.startsWith('apify:')||apify.apifyConfigured()){
+   try{const j=data.job?await apify.checkApify(data.job):await apify.startApify(parsed.value,data.mode,data.quality);return {dedicated:true,...j};}
+   catch(error){return {dedicated:true,error:error instanceof Error?error.message:'Conversion unavailable.'};}
+  }
   const serviceUrl=process.env['CONVERSION_SERVICE_URL'];
   const serviceKey=process.env['CONVERTER_API_KEY'];
   if(serviceUrl || serviceKey || data.job){

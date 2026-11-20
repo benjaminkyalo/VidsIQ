@@ -4,6 +4,20 @@ const ALLOWED=[/^co\.otomir23\.me$/,/^api\.cobalt\.liubquanti\.click$/,/^[a-z0-9
 export const Route=createFileRoute('/api/media')({server:{handlers:{GET:async({request})=>{
  const params=new URL(request.url).searchParams;
  const ticket=params.get('job');
+ if(ticket?.startsWith('apify:')){
+  const {apifyJob,apifyFileUrl}=await import('@/lib/apify-service');
+  if(!apifyJob.safeParse(ticket).success)return new Response('Invalid conversion ticket',{status:400});
+  try{
+   const file=await apifyFileUrl(ticket);if(!file)return new Response('Converted file unavailable or expired',{status:404});
+   const r=await fetch(file,{signal:AbortSignal.any([request.signal,AbortSignal.timeout(300000)]),redirect:'follow'});
+   if(!r.ok||!r.body)return new Response('Converted file unavailable or expired',{status:502});
+   const type=r.headers.get('content-type')??'';
+   if(!/^(audio\/mpeg|video\/mp4)(;|$)/i.test(type))return new Response('Invalid converted file',{status:502});
+   const headers=new Headers({'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
+   const length=r.headers.get('content-length');if(length)headers.set('Estimated-Content-Length',length);
+   return new Response(r.body,{headers});
+  }catch{return new Response('Conversion service unavailable',{status:502});}
+ }
  if(ticket){
   const parsed=conversionTicket.safeParse(ticket);
   if(!parsed.success)return new Response('Invalid conversion ticket',{status:400});

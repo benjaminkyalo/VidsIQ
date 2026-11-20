@@ -1,3 +1,6 @@
+# Apify downloads on the live site
+- [x] Let the MP3, MP4 and Shorts flow call Apify directly with a personal token so it works on the self-hosted VPS as well as the Lovable preview, keep the connector gateway path for Lovable hosting, prefer Apify whenever it is configured, cover it with focused tests, and document the one server setting.
+
 # Channel video labels
 - [x] Rename the player section to “Popular songs/videos from [channel name]”, keep its source description accurate, and verify the live channel name renders on desktop and mobile.
 
@@ -106,3 +109,7 @@
 - [ ] Connect Google Search Console, verify vidsiq.com via META tag, submit sitemap.
 - [ ] Add Google Analytics (gtag) tracking with user's GA4 Measurement ID.
 - [ ] Keyword strategy: capture "youtube mp3/mp4 downloader" demand (user screenshots show vidsiq.com already indexed in Google).
+
+# Apify downloads (Nov 20 2026)
+- [x] Connect Apify YouTube downloader to MP3/MP4/Shorts guided flow; real MP3 test passed in preview.
+- [ ] Push to GitHub + add APIFY key on VPS — waits on owner saying "deploy".
