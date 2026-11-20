@@ -7,8 +7,9 @@ const staticPages = ['/', '/blogs', '/about', '/contact', '/privacy', '/terms', 
 export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
-      GET: ({ request }) => {
-        const origin = new URL(request.url).origin;
+      GET: () => {
+        // Fixed public origin: behind the VPS proxy request.url is the internal address.
+        const origin = 'https://vidsiq.com';
         const urls = [
           ...staticPages.map(path => ({ path, priority: path === '/' ? '1.0' : '0.5' })),
           ...blogPosts.map(p => ({ path: `/blogs/${p.slug}`, priority: '0.7' })),
