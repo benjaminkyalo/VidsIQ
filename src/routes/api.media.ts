@@ -21,7 +21,7 @@ export const Route=createFileRoute('/api/media')({server:{handlers:{GET:async({r
  if(ticket){
   const parsed=conversionTicket.safeParse(ticket);
   if(!parsed.success)return new Response('Invalid conversion ticket',{status:400});
-  const url=process.env['CONVERSION_SERVICE_URL'];const key=process.env['CONVERTER_API_KEY'];
+  const {serverSetting}=await import('@/lib/server-env');const url=serverSetting('CONVERSION_SERVICE_URL');const key=serverSetting('CONVERTER_API_KEY');
   if(!url||!key)return new Response('Conversion service unavailable',{status:503});
   try{
    const r=await fetch(new URL(`/v1/files/${parsed.data}`,conversionBase(url)),{headers:{Authorization:`Bearer ${key}`},signal:AbortSignal.any([request.signal,AbortSignal.timeout(300000)]),redirect:'manual'});
