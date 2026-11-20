@@ -9,7 +9,9 @@ const item = z.object({ status: z.string().optional(), title: z.string().optiona
 
 // On self-hosted servers the connector gateway is unavailable, so a personal
 // Apify token may be supplied directly; it is read only inside server handlers.
-export function apifyDirectToken() { return process.env['APIFY_DIRECT_TOKEN'] || process.env['APIFY_TOKEN'] || ''; }
+// Tolerate pasted values wrapped in quotes or carrying stray spaces/line endings.
+const cleanToken = (v: string | undefined) => (v ?? '').trim().replace(/^['"]|['"]$/g, '').trim();
+export function apifyDirectToken() { return cleanToken(process.env['APIFY_DIRECT_TOKEN']) || cleanToken(process.env['APIFY_TOKEN']); }
 export function apifyConfigured() { return Boolean(apifyDirectToken() || (process.env['APIFY_API_KEY'] && process.env['LOVABLE_API_KEY'])); }
 async function call(path: string, init: RequestInit = {}) {
   const direct = apifyDirectToken();
