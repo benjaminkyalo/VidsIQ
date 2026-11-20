@@ -1,4 +1,6 @@
-const missing = ['GOOGLE_API_KEY'].filter((name) => !process.env[name]?.trim());
+// Same cleanup the site applies: ignore stray quotes, spaces and Windows line endings.
+const setting = (...names) => { for (const n of names) { const v = (process.env[n] ?? '').trim().replace(/^['"]|['"]$/g, '').trim(); if (v) return v; } return ''; };
+const missing = ['GOOGLE_API_KEY'].filter((name) => !setting(name));
 
 if (missing.length) {
   console.error(`Missing required settings: ${missing.join(', ')}`);
@@ -6,9 +8,9 @@ if (missing.length) {
   process.exit(1);
 }
 
-const apifyToken = process.env.APIFY_DIRECT_TOKEN?.trim() || process.env.APIFY_TOKEN?.trim();
-const serviceUrl = process.env.CONVERSION_SERVICE_URL?.trim();
-const serviceKey = process.env.CONVERTER_API_KEY?.trim();
+const apifyToken = setting('APIFY_DIRECT_TOKEN', 'APIFY_TOKEN');
+const serviceUrl = setting('CONVERSION_SERVICE_URL');
+const serviceKey = setting('CONVERTER_API_KEY');
 
 if (!apifyToken && !(serviceUrl && serviceKey)) {
   console.error('Missing download settings: set APIFY_DIRECT_TOKEN, or both CONVERSION_SERVICE_URL and CONVERTER_API_KEY.');
@@ -17,7 +19,20 @@ if (!apifyToken && !(serviceUrl && serviceKey)) {
 }
 
 if (apifyToken) {
-  console.log('Downloads: Apify (personal token configured).');
+  // Presence is not enough: confirm Apify actually accepts the key before going live.
+  let status = 0;
+  try {
+    const r = await fetch('https://api.apify.com/v2/users/me', { headers: { Authorization: `Bearer ${apifyToken}` }, signal: AbortSignal.timeout(15000) });
+    status = r.status;
+  } catch {
+    console.error('Could not reach Apify to check the download key. Check the server internet connection.');
+    process.exit(1);
+  }
+  if (status !== 200) {
+    console.error(`Apify rejected APIFY_DIRECT_TOKEN (HTTP ${status}). Create a new token in Apify and save it again in /etc/vidsiq.env.`);
+    process.exit(1);
+  }
+  console.log('Downloads: Apify key accepted by Apify.');
 }
 
 if (serviceUrl && serviceKey) {
@@ -43,4 +58,4 @@ if (serviceUrl && serviceKey) {
 }
 
 console.log('VidsIQ settings loaded: YouTube and download settings are present.');
-console.log(`AI writing: ${process.env.AI_API_KEY?.trim() ? 'configured' : 'not configured (optional)'}.`);
+console.log(`AI writing: ${setting('AI_API_KEY', 'OPENAI_API_KEY') ? 'configured' : 'not configured (optional)'}.`);
