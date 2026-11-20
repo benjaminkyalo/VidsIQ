@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apifyConfigured, apifyDirectToken, apifyJob, startApify } from './apify-service';
 
 const KEYS = ['APIFY_DIRECT_TOKEN', 'APIFY_TOKEN', 'APIFY_API_KEY', 'LOVABLE_API_KEY'] as const;
@@ -64,4 +64,16 @@ it('accepts only well-formed Apify job tickets', () => {
   expect(apifyJob.safeParse('apify:run1234567890ab').success).toBe(true);
   expect(apifyJob.safeParse('apify:short').success).toBe(false);
   expect(apifyJob.safeParse('deadbeefdeadbeef.deadbee').success).toBe(false);
+});
+
+describe('apify token cleanup', () => {
+  it('strips quotes, spaces and Windows line endings from the saved token', async () => {
+    const { apifyDirectToken } = await import('./apify-service');
+    const prev = process.env['APIFY_DIRECT_TOKEN'];
+    process.env['APIFY_DIRECT_TOKEN'] = ' "apify_api_abc123"\r';
+    expect(apifyDirectToken()).toBe('apify_api_abc123');
+    process.env['APIFY_DIRECT_TOKEN'] = "   ";
+    expect(apifyDirectToken()).toBe('');
+    if (prev === undefined) delete process.env['APIFY_DIRECT_TOKEN']; else process.env['APIFY_DIRECT_TOKEN'] = prev;
+  });
 });
