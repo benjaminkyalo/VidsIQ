@@ -21,7 +21,7 @@ export const getToolData = createServerFn({ method:'POST' }).inputValidator((dat
    const result=await r.json() as {dislikes?:number;likes?:number};
    return {...empty,dislikes:result.dislikes,likes:result.likes};
   }
-  const googleKey=process.env['GOOGLE_API_KEY'] || process.env['YOUTUBE_API_KEY']; const key=process.env['UDC_YOUTUBE_DATA_API_2_API_KEY']; const lovableKey=process.env['LOVABLE_API_KEY'];
+  const {serverSetting}=await import('./server-env'); const googleKey=serverSetting('GOOGLE_API_KEY','YOUTUBE_API_KEY'); const key=serverSetting('UDC_YOUTUBE_DATA_API_2_API_KEY'); const lovableKey=serverSetting('LOVABLE_API_KEY');
   if(!googleKey && (!key || !lovableKey)) return {...empty,error:'The YouTube connection is not configured.'};
   const { cachedPublicJson } = await import('./public-data-cache.server');
   async function api(endpoint:string,params:Record<string,string>) {
@@ -102,8 +102,9 @@ export const getMediaDownload = createServerFn({ method:'POST' }).inputValidator
    try{const j=data.job?await apify.checkApify(data.job):await apify.startApify(parsed.value,data.mode,data.quality);return {dedicated:true,...j};}
    catch(error){return {dedicated:true,error:error instanceof Error?error.message:'Conversion unavailable.'};}
   }
-  const serviceUrl=process.env['CONVERSION_SERVICE_URL'];
-  const serviceKey=process.env['CONVERTER_API_KEY'];
+  const {serverSetting}=await import('./server-env');
+  const serviceUrl=serverSetting('CONVERSION_SERVICE_URL');
+  const serviceKey=serverSetting('CONVERTER_API_KEY');
   if(serviceUrl || serviceKey || data.job){
    if(!serviceUrl || !serviceKey)return {error:'The dedicated conversion service is not fully configured.'};
    const {requestConversion}=await import('./conversion-service');
