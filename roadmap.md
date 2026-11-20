@@ -113,3 +113,5 @@
 # Apify downloads (Nov 20 2026)
 - [x] Connect Apify YouTube downloader to MP3/MP4/Shorts guided flow; real MP3 test passed in preview.
 - [ ] Push to GitHub + add APIFY key on VPS — waits on owner saying "deploy".
+
+- [x] Push Apify download update + sitemap origin fix to GitHub lovable-site (8aa24d7)

@@ -27,9 +27,11 @@ export function initAnalytics(): void {
   document.head.appendChild(script);
 
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag(...args: unknown[]) {
-    window.dataLayer!.push(args);
-  };
+  // gtag.js only processes the native Arguments object; pushing a plain array is ignored.
+  window.gtag = function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer!.push(arguments);
+  } as (...args: unknown[]) => void;
   window.gtag("js", new Date());
   window.gtag("config", measurementId);
 }
