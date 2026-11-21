@@ -1,0 +1,8 @@
+export function RevenueIntelligence() {
+ return <section className="revenue-intelligence" aria-labelledby="revenue-intelligence-title"><div className="revenue-intelligence-inner">
+  <div className="revenue-intelligence-heading"><p className="revenue-eyebrow">REVENUE INTELLIGENCE</p><h2 id="revenue-intelligence-title">Public channel signals, not private earnings</h2><p>Use a channel’s published activity to frame your research before making a revenue or sponsorship decision.</p></div>
+  <div className="revenue-intelligence-content"><div className="revenue-explanation"><p>The report combines subscriber totals, lifetime views, channel age, and recent uploads. Together, these help you distinguish an established publishing history from a newer channel with limited public activity.</p><p>The displayed monetization status is a guess based on public signals. YouTube Partner Program enrollment, valid watch hours, and actual payments are not supplied by public records. Confirm those details in YouTube Studio or with the creator.</p></div>
+   <div className="revenue-comparison"><article className="revenue-problem"><h3>THE PROBLEM</h3><p>Subscriber totals alone do not establish approval or income. A large audience can still have policy issues or no active ad revenue.</p></article><article className="revenue-solution"><h3>THE SOLUTION</h3><p>Review activity and earnings scenarios together, then request direct confirmation before applying, budgeting, or signing a sponsorship.</p></article></div>
+  </div>
+ </div></section>;
+}

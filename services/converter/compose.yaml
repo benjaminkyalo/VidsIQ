@@ -1,0 +1,27 @@
+services:
+  converter:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
+    env_file: /etc/vidsiq-converter.env
+    volumes:
+      - converter-files:/data
+    cpus: 2
+    mem_limit: 2g
+    pids_limit: 128
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+      - /home/converter:rw,nosuid,size=128m,uid=10001,gid=10001
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  converter-files:
