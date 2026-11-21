@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Application structure
+- Resolve breadcrumb identifiers through the shared browser-safe production URL helper so prerendered tool, information, and article pages emit absolute addresses without changing canonicals.
 - Run dedicated media conversion only in the isolated VPS service; website handlers call its authenticated job API and proxy validated ticket files, never spawn processes or silently fall back when configured.
 - Keep the creator tool catalog in a browser-safe shared module and use the shared site shell for content routes, so tool names and navigation remain consistent.
 - Tool selection must not fabricate analytics or download progress; unconnected tools show an explicit unavailable state, while browser-safe thumbnail and link utilities can resolve public video IDs.

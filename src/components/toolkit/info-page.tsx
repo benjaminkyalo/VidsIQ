@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { SiteShell } from '@/components/toolkit/site-shell';
 import { toolSlug } from '@/lib/tools';
+import { breadcrumbUrl } from '@/lib/breadcrumb-url';
 
 export type InfoSection = { h: string; p: string; tools?: string[] };
 export type Faq = [string, string];
@@ -19,7 +20,7 @@ export function infoHead(path: string, title: string, desc: string, faqs: Faq[],
     links: [{ rel: 'canonical', href: path }],
     scripts: [{ type: 'application/ld+json', children: JSON.stringify({ '@context': 'https://schema.org', '@graph': [
       { '@type': type, name: title, description: desc, url: path },
-      { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: '/' }, { '@type': 'ListItem', position: 2, name: title.split(' | ')[0], item: path }] },
+      { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: breadcrumbUrl('/') }, { '@type': 'ListItem', position: 2, name: title.split(' | ')[0], item: breadcrumbUrl(path) }] },
       ...(faqs.length ? [{ '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }] : []),
     ] }) }],
   };

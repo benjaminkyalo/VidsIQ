@@ -2,6 +2,7 @@ import { toolSlug, type Tool } from './tools';
 import { getToolSearchContent } from './tool-search-content';
 import { thumbnailFaqSchema, thumbnailPageContent } from './thumbnail-content';
 import { getPageGuide } from './page-guides';
+import { breadcrumbUrl } from './breadcrumb-url';
 
 /** Search-demand overrides for priority tools: titles and descriptions use the phrases people actually search. */
 export const searchOverrides: Record<string, { title: string; description: string }> = {
@@ -84,8 +85,8 @@ export function toolSearchHead(tool: Pick<Tool, 'name' | 'description'>) {
           {
             '@type': 'BreadcrumbList',
             itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'VidsIQ', item: '/' },
-              { '@type': 'ListItem', position: 2, name: identity.name, item: identity.path },
+              { '@type': 'ListItem', position: 1, name: 'VidsIQ', item: breadcrumbUrl('/') },
+              { '@type': 'ListItem', position: 2, name: identity.name, item: breadcrumbUrl(identity.path) },
             ],
           },
           ...(tool.name === 'Thumbnail Downloader' || getPageGuide(tool.name) ? [{

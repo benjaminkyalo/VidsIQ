@@ -6,6 +6,7 @@ import { SiteImage } from '@/components/toolkit/site-image';
 import { findBlogPost } from '@/lib/blog-posts';
 import { blogImages } from '@/lib/blog-images';
 import { toolSlug } from '@/lib/tools';
+import { breadcrumbUrl } from '@/lib/breadcrumb-url';
 
 export const Route = createFileRoute('/blogs/$slug')({
   loader: ({ params }) => { const post = findBlogPost(params.slug); if (!post) throw notFound(); return post; },
@@ -25,9 +26,9 @@ export const Route = createFileRoute('/blogs/$slug')({
       scripts: [{ type: 'application/ld+json', children: JSON.stringify({ '@context': 'https://schema.org', '@graph': [
         { '@type': 'BlogPosting', headline: p.title, description: p.excerpt, datePublished: p.isoDate, articleSection: p.category, url: path, mainEntityOfPage: path, publisher: { '@type': 'Organization', name: 'VidsIQ' } },
         { '@type': 'BreadcrumbList', itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: '/' },
-          { '@type': 'ListItem', position: 2, name: 'Blog', item: '/blogs' },
-          { '@type': 'ListItem', position: 3, name: p.title, item: path },
+          { '@type': 'ListItem', position: 1, name: 'Home', item: breadcrumbUrl('/') },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: breadcrumbUrl('/blogs') },
+          { '@type': 'ListItem', position: 3, name: p.title, item: breadcrumbUrl(path) },
         ] },
       ] }) }],
     };

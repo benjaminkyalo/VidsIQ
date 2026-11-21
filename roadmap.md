@@ -1,3 +1,6 @@
+# Breadcrumb address correction
+- [x] Correct only breadcrumb identifiers across tools, information pages and articles; verified all 83 public pages, 164 absolute identifiers on 79 breadcrumb-bearing pages, preserved metadata, and eight focused checks. Live VPS deployment remains the owner's next step.
+
 # Apify downloads on the live site
 - [x] Let the MP3, MP4 and Shorts flow call Apify directly with a personal token so it works on the self-hosted VPS as well as the Lovable preview, keep the connector gateway path for Lovable hosting, prefer Apify whenever it is configured, cover it with focused tests, and document the one server setting.
 
