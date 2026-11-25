@@ -34,6 +34,34 @@ export const searchOverrides: Record<string, { title: string; description: strin
     title: 'YouTube Tag Generator — Free AI Tags for Videos | VidsIQ',
     description: 'Free AI YouTube tag generator: get relevant video tags from a topic or link, ready to copy as a comma-separated list.',
   },
+  'SEO Score Checker': {
+    title: 'YouTube SEO Checker — Free Video Metadata Audit | VidsIQ',
+    description: 'Free YouTube SEO checker: audit any video title, description, tags and metadata checklist in seconds, with an editable AI description draft. No signup.',
+  },
+  'Thumbnail Viewer': {
+    title: 'YouTube Thumbnail Viewer & Preview — Full Size Check | VidsIQ',
+    description: 'View any public YouTube thumbnail at full resolution and compare available sizes to check clarity before publishing or saving. Free, no signup.',
+  },
+  'Hashtag Generator': {
+    title: 'YouTube Hashtag Generator — Free Video & Shorts Tags | VidsIQ',
+    description: 'Generate relevant YouTube hashtags from your topic for videos and Shorts. Pick focused tags for the top three slots above your title. Free, no signup.',
+  },
+  'Live Subscriber Count': {
+    title: 'Live Subscriber Counter — YouTube Sub Count Checker | VidsIQ',
+    description: 'Check any channel’s public YouTube subscriber count with quick refresh for milestone tracking and channel comparisons. Free, no signup.',
+  },
+  'Like Counter': {
+    title: 'YouTube Like Counter — Check Public Video Likes | VidsIQ',
+    description: 'Look up the public like count of any YouTube video and refresh it anytime for quick performance checks. Free, fast, no signup.',
+  },
+  'Views to Money': {
+    title: 'YouTube Views to Money Converter — RPM Calculator | VidsIQ',
+    description: 'Estimate YouTube earnings from views and RPM using (views ÷ 1,000) × RPM. Compare Shorts and long-form scenarios as estimates, not guaranteed payouts.',
+  },
+  'YouTube Shorts Downloader': {
+    title: 'YouTube Shorts Downloader — Save Your Own Shorts | VidsIQ',
+    description: 'Download your own or permitted YouTube Shorts as MP4 for editing, backup or reposting. Choose your quality online for free, no signup.',
+  },
 };
 
 export function toolSearchIdentity(tool: Pick<Tool, 'name' | 'description'>) {

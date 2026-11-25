@@ -24,6 +24,13 @@ describe('individual search destinations', () => {
     expect(title('youtube-without-ads')).toContain('Watch YouTube Without Ads');
     expect(title('transcript-generator')).toContain('YouTube Transcript Generator');
     expect(title('thumbnail-downloader')).toContain('YouTube Thumbnail Downloader');
+    expect(title('seo-score-checker')).toContain('YouTube SEO Checker');
+    expect(title('thumbnail-viewer')).toContain('YouTube Thumbnail Viewer & Preview');
+    expect(title('hashtag-generator')).toContain('YouTube Hashtag Generator');
+    expect(title('live-subscriber-count')).toContain('Live Subscriber Counter');
+    expect(title('like-counter')).toContain('YouTube Like Counter');
+    expect(title('views-to-money')).toContain('YouTube Views to Money Converter');
+    expect(title('youtube-shorts-downloader')).toContain('YouTube Shorts Downloader');
   });
   it('keeps every override title and description within search snippet limits', () => {
     for (const { title, description } of Object.values(searchOverrides)) {
